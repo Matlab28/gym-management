@@ -1,0 +1,23 @@
+spring:
+  application:
+    name: gym-management
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/gym_management
+    username: postgres
+    password: 2812
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+
+  h2:
+    console:
+      enabled: true
+
+security:
+  jwt:
+    secret: ${JWT_SECRET:IhOKpzNEWKKpkQXoOLDCVdJ7zSKXtavXbPidtf+kFSETu5r2de7jhjO5ntlUvgc0+ZP2w2y1KIXuCZNNCjtPQw==}
+    expiration-ms: ${JWT_EXPIRATION_MS:86400000}

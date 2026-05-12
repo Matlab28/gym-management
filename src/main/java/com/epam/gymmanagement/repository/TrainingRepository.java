@@ -1,5 +1,6 @@
 package com.epam.gymmanagement.repository;
 
+import com.epam.gymmanagement.constant.TrainingType;
 import com.epam.gymmanagement.entity.TrainingEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -8,9 +9,10 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.UUID;
 
 @Repository
-public interface TrainingRepository extends JpaRepository<TrainingEntity, Long> {
+public interface TrainingRepository extends JpaRepository<TrainingEntity, UUID> {
     List<TrainingEntity> findByTrainee_UserEntity_Username(String username);
 
     List<TrainingEntity> findByTrainerUserUsername(String username);
@@ -23,8 +25,7 @@ public interface TrainingRepository extends JpaRepository<TrainingEntity, Long> 
             AND (:trainerName IS NULL OR
                  LOWER(CONCAT(t.trainer.user.firstName, ' ', t.trainer.user.lastName))
                  LIKE LOWER(CONCAT('%', :trainerName, '%')))
-            AND (:trainingType IS NULL OR
-                 LOWER(t.trainingType.trainingTypeName) = LOWER(:trainingType))
+            AND (:trainingType IS NULL OR t.trainingType.trainingTypeName = :trainingType)
             ORDER BY t.trainingDate DESC
             """)
     List<TrainingEntity> findTraineeTrainings(
@@ -32,7 +33,7 @@ public interface TrainingRepository extends JpaRepository<TrainingEntity, Long> 
             @Param("periodFrom") LocalDate periodFrom,
             @Param("periodTo") LocalDate periodTo,
             @Param("trainerName") String trainerName,
-            @Param("trainingType") String trainingType
+            @Param("trainingType") TrainingType trainingType
     );
 
     @Query("""

@@ -1,7 +1,10 @@
 package com.epam.gymmanagement.service;
 
 import com.epam.gymmanagement.constant.TrainingType;
+import com.epam.gymmanagement.constant.UserRole;
 import com.epam.gymmanagement.dto.request.AddTrainingRequestDTO;
+import com.epam.gymmanagement.dto.request.TraineeTraineesRequestDTO;
+import com.epam.gymmanagement.dto.request.TrainerTrainingsRequestDTO;
 import com.epam.gymmanagement.dto.response.MessageResponseDTO;
 import com.epam.gymmanagement.dto.response.TrainingResponseDTO;
 import com.epam.gymmanagement.entity.TraineeEntity;
@@ -14,24 +17,35 @@ import com.epam.gymmanagement.repository.TraineeRepository;
 import com.epam.gymmanagement.repository.TrainerRepository;
 import com.epam.gymmanagement.repository.TrainingRepository;
 import com.epam.gymmanagement.repository.TrainingTypeRepository;
-import jakarta.transaction.Transactional;
+import com.epam.gymmanagement.security.SecurityService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class TrainingService {
     private final TrainingRepository trainingRepository;
     private final TraineeRepository traineeRepository;
     private final TrainerRepository trainerRepository;
     private final TrainingTypeRepository trainingTypeRepository;
     private final GymMapper gymMapper;
+    private final SecurityService securityService;
 
     @Transactional
     public MessageResponseDTO addTraining(AddTrainingRequestDTO request) {
+        securityService.requireRole(UserRole.ADMIN, UserRole.TRAINER);
+
+        if (!securityService.hasRole(UserRole.ADMIN)
+                && !securityService.currentUsername().equals(request.getTrainerUsername())) {
+            throw new org.springframework.security.access.AccessDeniedException("Trainer can add only own trainings");
+        }
+
         TraineeEntity trainee = traineeRepository
                 .findByUserEntity_Username(request.getTraineeUsername())
                 .orElseThrow(() -> new NotFoundException("Trainee not found"));
@@ -40,9 +54,14 @@ public class TrainingService {
                 .findByUserUsername(request.getTrainerUsername())
                 .orElseThrow(() -> new NotFoundException("Trainer not found"));
 
+        TrainingType requestedTrainingType = parseTrainingType(request.getTrainingType());
         TrainingTypeEntity trainingType = trainingTypeRepository
-                .findByTrainingTypeNameIgnoreCase(TrainingType.valueOf(request.getTrainingType()))
+                .findByTrainingTypeName(requestedTrainingType)
                 .orElseThrow(() -> new NotFoundException("Training type not found"));
+
+        if (!trainer.getSpecialization().getTrainingTypeName().equals(requestedTrainingType)) {
+            throw new BadRequestException("Training type must match trainer specialization");
+        }
 
         boolean trainerAssignedToTrainee = trainee.getTrainers()
                 .stream()
@@ -70,33 +89,55 @@ public class TrainingService {
 
         trainingRepository.save(training);
 
-        /**
-         * Later you can call DynamoDB summary update here.
-         *
-         * epam:
-         * trainingSummaryService.updateTrainerSummary(training);
-         */
+        log.info(
+                "Added training name={} trainee={} trainer={}",
+                request.getTrainingName(),
+                request.getTraineeUsername(),
+                request.getTrainerUsername()
+        );
 
         return new MessageResponseDTO("Training added successfully");
     }
 
-    public List<TrainingResponseDTO> getTraineeTrainings(
-            String username,
-            LocalDate periodFrom,
-            LocalDate periodTo,
-            String trainerName,
-            String trainingType
-    ) {
-        if (!traineeRepository.existsByUserEntity_Username(username)) {
+    @Transactional(readOnly = true)
+    public List<TrainingResponseDTO> getTraineeTrainings(TraineeTraineesRequestDTO dto) {
+        securityService.requireSelfOrAdmin(dto.getUsername(), UserRole.TRAINEE);
+        validatePeriod(dto.getPeriodFrom(), dto.getPeriodTo());
+
+        if (!traineeRepository.existsByUserEntity_Username(dto.getUsername())) {
             throw new NotFoundException("Trainee not found");
         }
 
+        TrainingType normalizedTrainingType = normalizeTrainingType(dto.getTrainingType().getValue());
+
         List<TrainingEntity> trainings = trainingRepository.findTraineeTrainings(
-                username,
-                periodFrom,
-                periodTo,
-                trainerName,
-                trainingType
+                dto.getUsername(),
+                dto.getPeriodFrom(),
+                dto.getPeriodTo(),
+                dto.getTrainerName(),
+                normalizedTrainingType
+        );
+
+        return trainings
+                .stream()
+                .map(gymMapper::toTrainingResponse)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<TrainingResponseDTO> getTrainerTrainings(TrainerTrainingsRequestDTO dto) {
+        securityService.requireSelfOrAdmin(dto.getUsername(), UserRole.TRAINER);
+        validatePeriod(dto.getPeriodFrom(), dto.getPeriodTo());
+
+        if (!trainerRepository.existsByUserUsername(dto.getUsername())) {
+            throw new NotFoundException("Trainer not found");
+        }
+
+        List<TrainingEntity> trainings = trainingRepository.findTrainerTrainings(
+                dto.getUsername(),
+                dto.getPeriodFrom(),
+                dto.getPeriodTo(),
+                dto.getTraineeName()
         );
 
         return trainings.stream()
@@ -104,25 +145,81 @@ public class TrainingService {
                 .toList();
     }
 
-    public List<TrainingResponseDTO> getTrainerTrainings(
-            String username,
-            LocalDate periodFrom,
-            LocalDate periodTo,
-            String traineeName
-    ) {
-        if (!trainerRepository.existsByUserUsername(username)) {
-            throw new NotFoundException("Trainer not found");
+//    @Transactional(readOnly = true)
+//    public List<TrainingResponseDTO> getTraineeTrainings(
+//            String username,
+//            LocalDate periodFrom,
+//            LocalDate periodTo,
+//            String trainerName,
+//            String trainingType
+//    ) {
+//        securityService.requireSelfOrAdmin(username, UserRole.TRAINEE);
+//        validatePeriod(periodFrom, periodTo);
+//
+//        if (!traineeRepository.existsByUserEntity_Username(username)) {
+//            throw new NotFoundException("Trainee not found");
+//        }
+//
+//        TrainingType normalizedTrainingType = normalizeTrainingType(trainingType);
+//
+//        List<TrainingEntity> trainings = trainingRepository.findTraineeTrainings(
+//                username,
+//                periodFrom,
+//                periodTo,
+//                trainerName,
+//                normalizedTrainingType
+//        );
+//
+//        return trainings.stream()
+//                .map(gymMapper::toTrainingResponse)
+//                .toList();
+//    }
+//
+//    @Transactional(readOnly = true)
+//    public List<TrainingResponseDTO> getTrainerTrainings(
+//            String username,
+//            LocalDate periodFrom,
+//            LocalDate periodTo,
+//            String traineeName
+//    ) {
+//        securityService.requireSelfOrAdmin(username, UserRole.TRAINER);
+//        validatePeriod(periodFrom, periodTo);
+//
+//        if (!trainerRepository.existsByUserUsername(username)) {
+//            throw new NotFoundException("Trainer not found");
+//        }
+//
+//        List<TrainingEntity> trainings = trainingRepository.findTrainerTrainings(
+//                username,
+//                periodFrom,
+//                periodTo,
+//                traineeName
+//        );
+//
+//        return trainings.stream()
+//                .map(gymMapper::toTrainingResponse)
+//                .toList();
+//    }
+
+    private TrainingType parseTrainingType(String trainingType) {
+        try {
+            return TrainingType.fromValue(trainingType);
+        } catch (IllegalArgumentException exception) {
+            throw new BadRequestException(exception.getMessage());
+        }
+    }
+
+    private TrainingType normalizeTrainingType(String trainingType) {
+        if (trainingType == null || trainingType.isBlank()) {
+            return null;
         }
 
-        List<TrainingEntity> trainings = trainingRepository.findTrainerTrainings(
-                username,
-                periodFrom,
-                periodTo,
-                traineeName
-        );
+        return parseTrainingType(trainingType);
+    }
 
-        return trainings.stream()
-                .map(gymMapper::toTrainingResponse)
-                .toList();
+    private void validatePeriod(LocalDate periodFrom, LocalDate periodTo) {
+        if (periodFrom != null && periodTo != null && periodFrom.isAfter(periodTo)) {
+            throw new BadRequestException("Period from must be before or equal to period to");
+        }
     }
 }

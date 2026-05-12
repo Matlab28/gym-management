@@ -16,7 +16,7 @@ import java.util.UUID;
 @Table(name = "trainers")
 public class TrainerEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
     @OneToOne
@@ -28,6 +28,7 @@ public class TrainerEntity {
     private TrainingTypeEntity specialization;
 
     @ManyToMany(mappedBy = "trainers")
+    @Builder.Default
     private List<TraineeEntity> trainees = new ArrayList<>();
 
     @OneToMany(
@@ -35,5 +36,6 @@ public class TrainerEntity {
             cascade = CascadeType.ALL,
             orphanRemoval = true
     )
+    @Builder.Default
     private List<TrainingEntity> trainings = new ArrayList<>();
 }

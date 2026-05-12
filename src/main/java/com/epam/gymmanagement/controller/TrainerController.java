@@ -5,14 +5,16 @@ import com.epam.gymmanagement.dto.request.update.UpdateTrainerProfileRequestDTO;
 import com.epam.gymmanagement.dto.response.RegistrationResponseDTO;
 import com.epam.gymmanagement.dto.response.TrainerProfileResponseDTO;
 import com.epam.gymmanagement.service.TrainerService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/v1/trainers")
 @RequiredArgsConstructor
+@RequestMapping("/api/v1/trainers")
+@SecurityRequirement(name = "Bearer Authentication")
 public class TrainerController {
     private final TrainerService trainerService;
 

@@ -17,7 +17,7 @@ import java.util.UUID;
 @Table(name = "trainees")
 public class TraineeEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
     private LocalDate dateOfBirth;
@@ -33,6 +33,7 @@ public class TraineeEntity {
             joinColumns = @JoinColumn(name = "trainee_id"),
             inverseJoinColumns = @JoinColumn(name = "trainer_id")
     )
+    @Builder.Default
     private List<TrainerEntity> trainers = new ArrayList<>();
 
     @OneToMany(
@@ -41,5 +42,6 @@ public class TraineeEntity {
             orphanRemoval = true
 
     )
+    @Builder.Default
     private List<TrainingEntity> trainings = new ArrayList<>();
 }

@@ -1,5 +1,6 @@
 package com.epam.gymmanagement.entity;
 
+import com.epam.gymmanagement.constant.UserRole;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -14,7 +15,7 @@ import java.util.UUID;
 @Table(name = "users")
 public class UserEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
     @Column(name = "first_name", nullable = false)
@@ -31,4 +32,16 @@ public class UserEntity {
 
     @Column(name = "is_active", nullable = false)
     private Boolean isActive;
+
+    @Enumerated(EnumType.STRING)
+    @Column
+    private UserRole role;
+
+    @PrePersist
+    @PreUpdate
+    void applyDefaults() {
+        if (role == null) {
+            role = UserRole.TRAINEE;
+        }
+    }
 }

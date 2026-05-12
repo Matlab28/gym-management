@@ -5,6 +5,7 @@ import com.epam.gymmanagement.dto.request.update.UpdateTraineeProfileRequestDTO;
 import com.epam.gymmanagement.dto.request.update.UpdateTraineeTrainersRequestDTO;
 import com.epam.gymmanagement.dto.response.*;
 import com.epam.gymmanagement.service.TraineeService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -13,10 +14,11 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/trainees")
 @RequiredArgsConstructor
+@RequestMapping("/api/v1/trainees")
+@CrossOrigin("https://gym-management-front.vercel.app")
+@SecurityRequirement(name = "Bearer Authentication")
 public class TraineeController {
-
     private final TraineeService traineeService;
 
     @PostMapping("/register")

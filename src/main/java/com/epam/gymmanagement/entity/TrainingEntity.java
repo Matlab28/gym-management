@@ -15,7 +15,7 @@ import java.util.UUID;
 @Builder
 public class TrainingEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
     @ManyToOne
