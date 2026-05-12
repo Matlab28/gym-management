@@ -145,62 +145,6 @@ public class TrainingService {
                 .toList();
     }
 
-//    @Transactional(readOnly = true)
-//    public List<TrainingResponseDTO> getTraineeTrainings(
-//            String username,
-//            LocalDate periodFrom,
-//            LocalDate periodTo,
-//            String trainerName,
-//            String trainingType
-//    ) {
-//        securityService.requireSelfOrAdmin(username, UserRole.TRAINEE);
-//        validatePeriod(periodFrom, periodTo);
-//
-//        if (!traineeRepository.existsByUserEntity_Username(username)) {
-//            throw new NotFoundException("Trainee not found");
-//        }
-//
-//        TrainingType normalizedTrainingType = normalizeTrainingType(trainingType);
-//
-//        List<TrainingEntity> trainings = trainingRepository.findTraineeTrainings(
-//                username,
-//                periodFrom,
-//                periodTo,
-//                trainerName,
-//                normalizedTrainingType
-//        );
-//
-//        return trainings.stream()
-//                .map(gymMapper::toTrainingResponse)
-//                .toList();
-//    }
-//
-//    @Transactional(readOnly = true)
-//    public List<TrainingResponseDTO> getTrainerTrainings(
-//            String username,
-//            LocalDate periodFrom,
-//            LocalDate periodTo,
-//            String traineeName
-//    ) {
-//        securityService.requireSelfOrAdmin(username, UserRole.TRAINER);
-//        validatePeriod(periodFrom, periodTo);
-//
-//        if (!trainerRepository.existsByUserUsername(username)) {
-//            throw new NotFoundException("Trainer not found");
-//        }
-//
-//        List<TrainingEntity> trainings = trainingRepository.findTrainerTrainings(
-//                username,
-//                periodFrom,
-//                periodTo,
-//                traineeName
-//        );
-//
-//        return trainings.stream()
-//                .map(gymMapper::toTrainingResponse)
-//                .toList();
-//    }
-
     private TrainingType parseTrainingType(String trainingType) {
         try {
             return TrainingType.fromValue(trainingType);

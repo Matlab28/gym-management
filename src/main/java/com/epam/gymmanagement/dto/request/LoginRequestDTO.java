@@ -1,8 +1,6 @@
 package com.epam.gymmanagement.dto.request;
 
-import com.epam.gymmanagement.validation.ValidPassword;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -13,7 +11,5 @@ public class LoginRequestDTO {
     private String username;
 
     @NotBlank(message = "Password is required")
-    @Size(min = 8, message = "Password must be at least 8 characters long.")
-    @ValidPassword(message = "Password must contain an uppercase letter, a lowercase letter, and a number.")
     private String password;
 }

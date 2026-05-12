@@ -65,6 +65,12 @@ class GymManagementApplicationTests {
     }
 
     @Test
+    void h2ConsoleIsRegistered() throws Exception {
+        mockMvc.perform(get("/h2-console"))
+                .andExpect(status().is3xxRedirection());
+    }
+
+    @Test
     void adminDashboardRequiresAdminRole() throws Exception {
         Registration trainee = registerTrainee("Admin", "Blocked" + System.nanoTime());
         String traineeToken = login(trainee.username(), trainee.password());
