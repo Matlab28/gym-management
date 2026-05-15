@@ -7,7 +7,9 @@ import com.epam.gymmanagement.dto.request.TrainerTrainingsRequestDTO;
 import com.epam.gymmanagement.dto.response.MessageResponseDTO;
 import com.epam.gymmanagement.dto.response.TrainingResponseDTO;
 import com.epam.gymmanagement.service.TrainingService;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -21,10 +23,15 @@ import java.util.List;
 @RequestMapping("/api/v1/trainings")
 @RequiredArgsConstructor
 @SecurityRequirement(name = "Bearer Authentication")
+@Tag(
+        name = "Training Controller",
+        description = "Endpoints for managing training sessions, including adding new trainings and retrieving trainings for trainees and trainers"
+)
 public class TrainingController {
     private final TrainingService trainingService;
 
-    @PostMapping
+    @PostMapping("/add")
+    @Operation(summary = "Add a new training session")
     public ResponseEntity<MessageResponseDTO> addTraining(
             @Valid @RequestBody AddTrainingRequestDTO request
     ) {
@@ -33,6 +40,7 @@ public class TrainingController {
     }
 
     @GetMapping("/trainee")
+    @Operation(summary = "Get training sessions for a trainee based on various filters")
     public ResponseEntity<List<TrainingResponseDTO>> getTraineeTrainings(
             @Valid @RequestBody TraineeTraineesRequestDTO dto
     ) {
@@ -40,6 +48,7 @@ public class TrainingController {
     }
 
     @GetMapping("/trainee/{username}")
+    @Operation(summary = "Get training sessions for a trainee based on various filters")
     public ResponseEntity<List<TrainingResponseDTO>> getTraineeTrainings(
             @PathVariable String username,
             @RequestParam(required = false)
@@ -62,6 +71,7 @@ public class TrainingController {
     }
 
     @GetMapping("/trainer/{username}")
+    @Operation(summary = "Get training sessions for a trainer based on various filters")
     public ResponseEntity<List<TrainingResponseDTO>> getTrainerTrainings(
             @PathVariable String username,
             @RequestParam(required = false)

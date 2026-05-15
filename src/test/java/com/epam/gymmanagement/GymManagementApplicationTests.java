@@ -83,6 +83,13 @@ class GymManagementApplicationTests {
     }
 
     @Test
+    void openApiDocsLoadWithGlobalExceptionHandlerEnabled() throws Exception {
+        mockMvc.perform(get("/v3/api-docs"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.openapi").exists());
+    }
+
+    @Test
     void adminDashboardRequiresAdminRole() throws Exception {
         Registration trainee = registerTrainee("Admin", "Blocked" + System.nanoTime());
         String traineeToken = login(trainee.username(), trainee.password());

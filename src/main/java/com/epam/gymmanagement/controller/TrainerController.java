@@ -6,7 +6,9 @@ import com.epam.gymmanagement.dto.response.MessageResponseDTO;
 import com.epam.gymmanagement.dto.response.RegistrationResponseDTO;
 import com.epam.gymmanagement.dto.response.TrainerProfileResponseDTO;
 import com.epam.gymmanagement.service.TrainerService;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -16,10 +18,15 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/trainers")
 @SecurityRequirement(name = "Bearer Authentication")
+@Tag(
+        name = "Trainer Controller",
+        description = "Endpoints for managing trainer profiles, including registration, profile updates, and activation/deactivation"
+)
 public class TrainerController {
     private final TrainerService trainerService;
 
     @PostMapping("/register")
+    @Operation(summary = "Register a new trainer")
     public ResponseEntity<RegistrationResponseDTO> registerTrainer(
             @Valid @RequestBody TrainerRegistrationRequestDTO request
     ) {
@@ -27,7 +34,8 @@ public class TrainerController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/{username}")
+    @GetMapping("profile/{username}")
+    @Operation(summary = "Get a trainer profile by username")
     public ResponseEntity<TrainerProfileResponseDTO> getTrainerProfile(
             @PathVariable String username
     ) {
@@ -35,7 +43,8 @@ public class TrainerController {
         return ResponseEntity.ok(response);
     }
 
-    @PutMapping("/{username}")
+    @PutMapping("update/{username}")
+    @Operation(summary = "Update a trainer profile by username")
     public ResponseEntity<TrainerProfileResponseDTO> updateTrainerProfile(
             @PathVariable String username,
             @Valid @RequestBody UpdateTrainerProfileRequestDTO request
@@ -45,6 +54,7 @@ public class TrainerController {
     }
 
     @PatchMapping("/{username}/activate")
+    @Operation(summary = "Activate a trainer profile by username")
     public ResponseEntity<MessageResponseDTO> activateTrainerProfile(
             @PathVariable String username
     ) {
@@ -53,6 +63,7 @@ public class TrainerController {
     }
 
     @PatchMapping("/{username}/deactivate")
+    @Operation(summary = "Deactivate a trainer profile by username")
     public ResponseEntity<MessageResponseDTO> deactivateTrainerProfile(
             @PathVariable String username
     ) {
