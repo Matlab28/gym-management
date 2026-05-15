@@ -5,6 +5,7 @@ import com.epam.gymmanagement.constant.UserRole;
 import com.epam.gymmanagement.dto.request.TrainerRegistrationRequestDTO;
 import com.epam.gymmanagement.dto.request.update.UpdateTrainerProfileRequestDTO;
 import com.epam.gymmanagement.dto.response.RegistrationResponseDTO;
+import com.epam.gymmanagement.dto.response.MessageResponseDTO;
 import com.epam.gymmanagement.dto.response.TrainerProfileResponseDTO;
 import com.epam.gymmanagement.entity.TrainerEntity;
 import com.epam.gymmanagement.entity.TrainingTypeEntity;
@@ -106,11 +107,45 @@ public class TrainerService {
         return gymMapper.toTrainerProfileResponse(updatedTrainer);
     }
 
+    @Transactional
+    public MessageResponseDTO activateTrainerProfile(String username) {
+        return changeTrainerStatus(username, true, "Trainer profile activated successfully");
+    }
+
+    @Transactional
+    public MessageResponseDTO deactivateTrainerProfile(String username) {
+        return changeTrainerStatus(username, false, "Trainer profile deactivated successfully");
+    }
+
     private TrainingType parseTrainingType(String trainingType) {
         try {
             return TrainingType.fromValue(trainingType);
         } catch (IllegalArgumentException exception) {
             throw new BadRequestException(exception.getMessage());
         }
+    }
+
+    private MessageResponseDTO changeTrainerStatus(
+            String username,
+            boolean active,
+            String successMessage
+    ) {
+        securityService.requireSelfOrAdmin(username, UserRole.TRAINER);
+
+        TrainerEntity trainer = trainerRepository.findByUserUsername(username)
+                .orElseThrow(() -> new NotFoundException("Trainer not found"));
+
+        UserEntity user = trainer.getUser();
+
+        if (Boolean.TRUE.equals(user.getIsActive()) == active) {
+            throw new BadRequestException("Trainer profile is already " + (active ? "active" : "inactive"));
+        }
+
+        user.setIsActive(active);
+        userRepository.save(user);
+
+        log.info("{} trainer profile for username={}", active ? "Activated" : "Deactivated", username);
+
+        return new MessageResponseDTO(successMessage);
     }
 }

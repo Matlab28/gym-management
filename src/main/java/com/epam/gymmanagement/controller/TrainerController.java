@@ -2,6 +2,7 @@ package com.epam.gymmanagement.controller;
 
 import com.epam.gymmanagement.dto.request.TrainerRegistrationRequestDTO;
 import com.epam.gymmanagement.dto.request.update.UpdateTrainerProfileRequestDTO;
+import com.epam.gymmanagement.dto.response.MessageResponseDTO;
 import com.epam.gymmanagement.dto.response.RegistrationResponseDTO;
 import com.epam.gymmanagement.dto.response.TrainerProfileResponseDTO;
 import com.epam.gymmanagement.service.TrainerService;
@@ -40,6 +41,22 @@ public class TrainerController {
             @Valid @RequestBody UpdateTrainerProfileRequestDTO request
     ) {
         TrainerProfileResponseDTO response = trainerService.updateTrainerProfile(username, request);
+        return ResponseEntity.ok(response);
+    }
+
+    @PatchMapping("/{username}/activate")
+    public ResponseEntity<MessageResponseDTO> activateTrainerProfile(
+            @PathVariable String username
+    ) {
+        MessageResponseDTO response = trainerService.activateTrainerProfile(username);
+        return ResponseEntity.ok(response);
+    }
+
+    @PatchMapping("/{username}/deactivate")
+    public ResponseEntity<MessageResponseDTO> deactivateTrainerProfile(
+            @PathVariable String username
+    ) {
+        MessageResponseDTO response = trainerService.deactivateTrainerProfile(username);
         return ResponseEntity.ok(response);
     }
 }

@@ -108,7 +108,7 @@ public class TrainingService {
             throw new NotFoundException("Trainee not found");
         }
 
-        TrainingType normalizedTrainingType = normalizeTrainingType(dto.getTrainingType().getValue());
+        TrainingType normalizedTrainingType = normalizeTrainingType(dto.getTrainingType());
 
         List<TrainingEntity> trainings = trainingRepository.findTraineeTrainings(
                 dto.getUsername(),
@@ -153,12 +153,8 @@ public class TrainingService {
         }
     }
 
-    private TrainingType normalizeTrainingType(String trainingType) {
-        if (trainingType == null || trainingType.isBlank()) {
-            return null;
-        }
-
-        return parseTrainingType(trainingType);
+    private TrainingType normalizeTrainingType(TrainingType trainingType) {
+        return trainingType;
     }
 
     private void validatePeriod(LocalDate periodFrom, LocalDate periodTo) {

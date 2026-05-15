@@ -2,6 +2,8 @@ package com.epam.gymmanagement.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import java.time.LocalDate;
 import java.util.UUID;
@@ -18,18 +20,19 @@ public class TrainingEntity {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "trainee_id", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private TraineeEntity trainee;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "trainer_id", nullable = false)
     private TrainerEntity trainer;
 
     @Column(nullable = false)
     private String trainingName;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "training_type_id", nullable = false)
     private TrainingTypeEntity trainingType;
 

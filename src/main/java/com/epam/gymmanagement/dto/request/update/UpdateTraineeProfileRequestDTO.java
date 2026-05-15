@@ -2,13 +2,15 @@ package com.epam.gymmanagement.dto.request.update;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDate;
 
 @Getter
 @Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class UpdateTraineeProfileRequestDTO {
     @NotBlank(message = "First name is required")
     private String firstName;

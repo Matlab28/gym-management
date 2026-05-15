@@ -54,6 +54,22 @@ public class TraineeController {
         return ResponseEntity.ok(response);
     }
 
+    @PatchMapping("/{username}/activate")
+    public ResponseEntity<MessageResponseDTO> activateTraineeProfile(
+            @PathVariable String username
+    ) {
+        MessageResponseDTO response = traineeService.activateTraineeProfile(username);
+        return ResponseEntity.ok(response);
+    }
+
+    @PatchMapping("/{username}/deactivate")
+    public ResponseEntity<MessageResponseDTO> deactivateTraineeProfile(
+            @PathVariable String username
+    ) {
+        MessageResponseDTO response = traineeService.deactivateTraineeProfile(username);
+        return ResponseEntity.ok(response);
+    }
+
     @GetMapping("/{username}/not-assigned-trainers")
     public ResponseEntity<List<TrainerShortResponseDTO>> getNotAssignedActiveTrainers(
             @PathVariable String username

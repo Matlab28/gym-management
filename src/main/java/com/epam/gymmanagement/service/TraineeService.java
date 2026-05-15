@@ -116,17 +116,23 @@ public class TraineeService {
 
         UserEntity user = trainee.getUserEntity();
 
-        /**
-         * Soft delete:
-         * We do not remove the record from DB.
-         * We only deactivate the profile.
-         */
-        user.setIsActive(false);
-        userRepository.save(user);
+        trainee.getTrainers().clear();
+        traineeRepository.delete(trainee);
+        userRepository.delete(user);
 
-        log.info("Deactivated trainee profile for username={}", username);
+        log.info("Deleted trainee profile for username={}", username);
 
-        return new MessageResponseDTO("Trainee profile deactivated successfully");
+        return new MessageResponseDTO("Trainee profile deleted successfully");
+    }
+
+    @Transactional
+    public MessageResponseDTO activateTraineeProfile(String username) {
+        return changeTraineeStatus(username, true, "Trainee profile activated successfully");
+    }
+
+    @Transactional
+    public MessageResponseDTO deactivateTraineeProfile(String username) {
+        return changeTraineeStatus(username, false, "Trainee profile deactivated successfully");
     }
 
     @Transactional(readOnly = true)
@@ -188,5 +194,25 @@ public class TraineeService {
         log.info("Updated trainer assignments for trainee username={}", traineeUsername);
 
         return new TrainerAssignmentResponseDTO(trainerResponses);
+    }
+
+    private MessageResponseDTO changeTraineeStatus(String username, boolean active, String successMessage) {
+        securityService.requireSelfOrAdmin(username, UserRole.TRAINEE);
+
+        TraineeEntity trainee = traineeRepository.findByUserEntity_Username(username)
+                .orElseThrow(() -> new NotFoundException("Trainee not found"));
+
+        UserEntity user = trainee.getUserEntity();
+
+        if (Boolean.TRUE.equals(user.getIsActive()) == active) {
+            throw new BadRequestException("Trainee profile is already " + (active ? "active" : "inactive"));
+        }
+
+        user.setIsActive(active);
+        userRepository.save(user);
+
+        log.info("{} trainee profile for username={}", active ? "Activated" : "Deactivated", username);
+
+        return new MessageResponseDTO(successMessage);
     }
 }

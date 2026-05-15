@@ -1,5 +1,6 @@
 package com.epam.gymmanagement.controller;
 
+import com.epam.gymmanagement.constant.TrainingType;
 import com.epam.gymmanagement.dto.request.AddTrainingRequestDTO;
 import com.epam.gymmanagement.dto.request.TraineeTraineesRequestDTO;
 import com.epam.gymmanagement.dto.request.TrainerTrainingsRequestDTO;
@@ -9,9 +10,11 @@ import com.epam.gymmanagement.service.TrainingService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -30,65 +33,59 @@ public class TrainingController {
     }
 
     @GetMapping("/trainee")
-    public ResponseEntity<List<TrainingResponseDTO>> getTraineeTrainings(@RequestBody TraineeTraineesRequestDTO dto) {
+    public ResponseEntity<List<TrainingResponseDTO>> getTraineeTrainings(
+            @Valid @RequestBody TraineeTraineesRequestDTO dto
+    ) {
+        return ResponseEntity.ok(trainingService.getTraineeTrainings(dto));
+    }
+
+    @GetMapping("/trainee/{username}")
+    public ResponseEntity<List<TrainingResponseDTO>> getTraineeTrainings(
+            @PathVariable String username,
+            @RequestParam(required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+            LocalDate periodFrom,
+            @RequestParam(required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+            LocalDate periodTo,
+            @RequestParam(required = false) String trainerName,
+            @RequestParam(required = false) String trainingType
+    ) {
+        TraineeTraineesRequestDTO dto = new TraineeTraineesRequestDTO();
+        dto.setUsername(username);
+        dto.setPeriodFrom(periodFrom);
+        dto.setPeriodTo(periodTo);
+        dto.setTrainerName(trainerName);
+        dto.setTrainingType(parseTrainingType(trainingType));
+
         return ResponseEntity.ok(trainingService.getTraineeTrainings(dto));
     }
 
     @GetMapping("/trainer/{username}")
-    public ResponseEntity<List<TrainingResponseDTO>> getTrainerTrainings(@RequestBody TrainerTrainingsRequestDTO dto) {
+    public ResponseEntity<List<TrainingResponseDTO>> getTrainerTrainings(
+            @PathVariable String username,
+            @RequestParam(required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+            LocalDate periodFrom,
+            @RequestParam(required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+            LocalDate periodTo,
+            @RequestParam(required = false) String traineeName
+    ) {
+        TrainerTrainingsRequestDTO dto = new TrainerTrainingsRequestDTO();
+        dto.setUsername(username);
+        dto.setPeriodFrom(periodFrom);
+        dto.setPeriodTo(periodTo);
+        dto.setTraineeName(traineeName);
+
         return ResponseEntity.ok(trainingService.getTrainerTrainings(dto));
     }
-//    @GetMapping("/trainee/{username}")
-//    public ResponseEntity<List<TrainingResponseDTO>> getTraineeTrainings(
-//            @PathVariable String username,
-//
-//            @RequestParam(required = false)
-//            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
-//            LocalDate periodFrom,
-//
-//            @RequestParam(required = false)
-//            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
-//            LocalDate periodTo,
-//
-//            @RequestParam(required = false)
-//            String trainerName,
-//
-//            @RequestParam(required = false)
-//            String trainingType
-//    ) {
-//        List<TrainingResponseDTO> response = trainingService.getTraineeTrainings(
-//                username,
-//                periodFrom,
-//                periodTo,
-//                trainerName,
-//                trainingType
-//        );
-//
-//        return ResponseEntity.ok(response);
-//    }
-//
-//    @GetMapping("/trainer/{username}")
-//    public ResponseEntity<List<TrainingResponseDTO>> getTrainerTrainings(
-//            @PathVariable String username,
-//
-//            @RequestParam(required = false)
-//            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
-//            LocalDate periodFrom,
-//
-//            @RequestParam(required = false)
-//            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
-//            LocalDate periodTo,
-//
-//            @RequestParam(required = false)
-//            String traineeName
-//    ) {
-//        List<TrainingResponseDTO> response = trainingService.getTrainerTrainings(
-//                username,
-//                periodFrom,
-//                periodTo,
-//                traineeName
-//        );
-//
-//        return ResponseEntity.ok(response);
-//    }
+
+    private TrainingType parseTrainingType(String trainingType) {
+        if (trainingType == null || trainingType.isBlank()) {
+            return null;
+        }
+
+        return TrainingType.fromValue(trainingType);
+    }
 }

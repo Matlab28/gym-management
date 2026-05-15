@@ -13,7 +13,6 @@ import com.epam.gymmanagement.repository.UserRepository;
 import com.epam.gymmanagement.security.JwtService;
 import com.epam.gymmanagement.security.SecurityService;
 import com.epam.gymmanagement.security.UserRoleResolver;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -32,7 +31,7 @@ public class AuthService {
 
     public LoginResponseDTO login(LoginRequestDTO request) {
         UserEntity user = userRepository.findByUsername(request.getUsername())
-                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+                .orElseThrow(() -> new BadRequestException("Invalid username or password"));
 
         if (!Boolean.TRUE.equals(user.getIsActive())) {
             throw new BadRequestException("User profile is inactive");

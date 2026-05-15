@@ -23,8 +23,8 @@ public class TraineeEntity {
     private LocalDate dateOfBirth;
     private String address;
 
-    @OneToOne
-    @JoinColumn(name = "user_id", nullable = false)
+    @OneToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "user_id", nullable = false, unique = true)
     private UserEntity userEntity;
 
     @ManyToMany
@@ -38,7 +38,7 @@ public class TraineeEntity {
 
     @OneToMany(
             mappedBy = "trainee",
-            cascade = CascadeType.ALL,
+            cascade = CascadeType.REMOVE,
             orphanRemoval = true
 
     )
