@@ -46,22 +46,22 @@ class GymManagementApplicationTests {
         Registration firstTrainee = registerTrainee("Jwt", "Owner" + System.nanoTime());
         Registration secondTrainee = registerTrainee("Jwt", "Other" + System.nanoTime());
 
-        mockMvc.perform(get("/api/v1/trainees/{username}", firstTrainee.username()))
+        mockMvc.perform(get("/api/v1/trainees/profile/{username}", firstTrainee.username()))
                 .andExpect(status().isUnauthorized());
 
         String firstToken = login(firstTrainee.username(), firstTrainee.password());
         String secondToken = login(secondTrainee.username(), secondTrainee.password());
 
-        mockMvc.perform(get("/api/v1/trainees/{username}", firstTrainee.username())
+        mockMvc.perform(get("/api/v1/trainees/profile/{username}", firstTrainee.username())
                         .header("Authorization", "Bearer " + firstToken))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.username").value(firstTrainee.username()));
 
-        mockMvc.perform(get("/api/v1/trainees/{username}", firstTrainee.username())
+        mockMvc.perform(get("/api/v1/trainees/profile/{username}", firstTrainee.username())
                         .header("Authorization", "Bearer " + secondToken))
                 .andExpect(status().isForbidden());
 
-        mockMvc.perform(get("/api/v1/trainees/{username}", firstTrainee.username())
+        mockMvc.perform(get("/api/v1/trainees/profile/{username}", firstTrainee.username())
                         .header("Authorization", "Bearer Bearer " + firstToken))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.username").value(firstTrainee.username()));
@@ -112,7 +112,7 @@ class GymManagementApplicationTests {
         assignTrainer(trainee.username(), trainer.username(), traineeToken);
         addTraining(trainee.username(), trainer.username(), trainerToken);
 
-        mockMvc.perform(delete("/api/v1/trainees/{username}", trainee.username())
+        mockMvc.perform(delete("/api/v1/trainees/delete/{username}", trainee.username())
                         .header("Authorization", "Bearer " + traineeToken))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.message").value("Trainee profile deleted successfully"));
@@ -174,7 +174,7 @@ class GymManagementApplicationTests {
                 }
         ));
 
-        mockMvc.perform(put("/api/v1/trainees/{username}/trainers", traineeUsername)
+        mockMvc.perform(put("/api/v1/trainees/update/{username}/trainers", traineeUsername)
                         .header("Authorization", "Bearer " + traineeToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
@@ -191,7 +191,7 @@ class GymManagementApplicationTests {
                 "trainingDuration", 45
         ));
 
-        mockMvc.perform(post("/api/v1/trainings")
+        mockMvc.perform(post("/api/v1/trainings/add")
                         .header("Authorization", "Bearer " + trainerToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))

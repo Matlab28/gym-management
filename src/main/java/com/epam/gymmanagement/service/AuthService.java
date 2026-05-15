@@ -76,7 +76,7 @@ public class AuthService {
 
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
         userRepository.save(user);
-        log.info("{} ID of user password changed for username", user.getPassword());
+        log.info("Password changed for username={}", user.getUsername());
         return new MessageResponseDTO("Password changed successfully");
     }
 
