@@ -5,6 +5,7 @@ import com.epam.gymmanagement.dto.request.update.UpdateTrainerProfileRequestDTO;
 import com.epam.gymmanagement.dto.response.MessageResponseDTO;
 import com.epam.gymmanagement.dto.response.RegistrationResponseDTO;
 import com.epam.gymmanagement.dto.response.TrainerProfileResponseDTO;
+import com.epam.gymmanagement.dto.response.TrainingTypeResponseDTO;
 import com.epam.gymmanagement.service.TrainerService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -13,6 +14,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -41,6 +44,12 @@ public class TrainerController {
     ) {
         TrainerProfileResponseDTO response = trainerService.getTrainerProfile(username);
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/training-types")
+    @Operation(summary = "Get all available training types")
+    public ResponseEntity<List<TrainingTypeResponseDTO>> getTrainingTypes() {
+        return ResponseEntity.ok(trainerService.getTrainingTypes());
     }
 
     @PutMapping("update/{username}")

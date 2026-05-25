@@ -1,32 +1,23 @@
 spring:
   application:
     name: gym-management
+  output:
+    ansi:
+      enabled: ALWAYS
   profiles:
     active: ${SPRING_PROFILES_ACTIVE:h2}
-
-security:
-  jwt:
-    secret: ${JWT_SECRET:IhOKpzNEWKKpkQXoOLDCVdJ7zSKXtavXbPidtf+kFSETu5r2de7jhjO5ntlUvgc0+ZP2w2y1KIXuCZNNCjtPQw==}
-    expiration-ms: ${JWT_EXPIRATION_MS:86400000}
-
----
-
-spring:
   config:
     activate:
       on-profile: h2
-
   datasource:
     url: ${SPRING_DATASOURCE_URL:jdbc:h2:mem:gym}
     driver-class-name: org.h2.Driver
     username: ${SPRING_DATASOURCE_USERNAME:sa}
     password: ${SPRING_DATASOURCE_PASSWORD:}
-
   jpa:
     hibernate:
       ddl-auto: update
     open-in-view: false
-
   h2:
     console:
       enabled: true
@@ -34,3 +25,44 @@ spring:
       settings:
         trace: false
         web-allow-others: ${H2_CONSOLE_WEB_ALLOW_OTHERS:false}
+  otlp:
+    metrics:
+      export:
+        url: http://localhost:4318/v1/metrics
+  opentelemetry:
+    tracing:
+      export:
+        otlp:
+          endpoint: http://localhost:4318/v1/traces
+    logging:
+      export:
+        otlp:
+          endpoint: http://localhost:4318/v1/logs
+
+security:
+  jwt:
+    secret: ${JWT_SECRET:IhOKpzNEWKKpkQXoOLDCVdJ7zSKXtavXbPidtf+kFSETu5r2de7jhjO5ntlUvgc0+ZP2w2y1KIXuCZNNCjtPQw==}
+    expiration-ms: ${JWT_EXPIRATION_MS:86400000}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        #        include: health,info,metrics,prometheus
+        include: '*'
+  tracing:
+    sampling:
+      probability: 1.0
+
+server:
+  shutdown: immediate
+
+logging:
+  level:
+    dev.danvega: INFO
+    org.springframework.boot.actuator.autoconfigure.opentelemetry: DEBUG
+    org.springframework.boot.docker.compose: DEBUG
+  pattern:
+    console: "%clr(%d{yyyy-MM-dd HH:mm:ss}){faint} %clr([%thread]){magenta} %clr(%-5level) %clr([%X{transactionId}]){cyan} %clr(%logger{36}){blue} %clr(-){faint} %msg%n"
+
+kind: Application

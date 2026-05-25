@@ -4,9 +4,10 @@ import com.epam.gymmanagement.constant.TrainingType;
 import com.epam.gymmanagement.constant.UserRole;
 import com.epam.gymmanagement.dto.request.TrainerRegistrationRequestDTO;
 import com.epam.gymmanagement.dto.request.update.UpdateTrainerProfileRequestDTO;
-import com.epam.gymmanagement.dto.response.RegistrationResponseDTO;
 import com.epam.gymmanagement.dto.response.MessageResponseDTO;
+import com.epam.gymmanagement.dto.response.RegistrationResponseDTO;
 import com.epam.gymmanagement.dto.response.TrainerProfileResponseDTO;
+import com.epam.gymmanagement.dto.response.TrainingTypeResponseDTO;
 import com.epam.gymmanagement.entity.TrainerEntity;
 import com.epam.gymmanagement.entity.TrainingTypeEntity;
 import com.epam.gymmanagement.entity.UserEntity;
@@ -20,15 +21,19 @@ import com.epam.gymmanagement.util.PasswordGenerator;
 import com.epam.gymmanagement.util.UsernameGenerator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.modelmapper.ModelMapper;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class TrainerService {
     private final UserRepository userRepository;
+    private final ModelMapper modelMapper;
     private final TrainerRepository trainerRepository;
     private final TrainingTypeRepository trainingTypeRepository;
     private final UsernameGenerator usernameGenerator;
@@ -51,25 +56,43 @@ public class TrainerService {
 
         String rawPassword = passwordGenerator.generate();
 
-        UserEntity user = new UserEntity();
-        user.setFirstName(request.getFirstName());
-        user.setLastName(request.getLastName());
-        user.setUsername(username);
-        user.setPassword(passwordEncoder.encode(rawPassword));
-        user.setIsActive(true);
-        user.setRole(UserRole.TRAINER);
+        UserEntity entity = modelMapper.map(request, UserEntity.class);
+        entity.setUsername(username);
+        entity.setPassword(passwordEncoder.encode(rawPassword));
+        entity.setIsActive(true);
+        entity.setRole(UserRole.TRAINER);
 
-        UserEntity savedUser = userRepository.save(user);
+//        UserEntity user = new UserEntity();
+//        user.setFirstName(request.getFirstName());
+//        user.setLastName(request.getLastName());
+//        user.setUsername(username);
+//        user.setPassword(passwordEncoder.encode(rawPassword));
+//        user.setIsActive(true);
+//        user.setRole(UserRole.TRAINER);
+
+        UserEntity savedUser = userRepository.save(entity);
 
         TrainerEntity trainer = new TrainerEntity();
         trainer.setUser(savedUser);
         trainer.setSpecialization(specialization);
 
         trainerRepository.save(trainer);
-
         log.info("Registered trainer profile for username={}", username);
-
         return new RegistrationResponseDTO(username, rawPassword);
+    }
+
+    @Transactional(readOnly = true)
+    public List<TrainingTypeResponseDTO> getTrainingTypes() {
+        log.info("All TrainingTypes were responded");
+        return trainingTypeRepository
+                .findAll()
+                .stream()
+                .map(entity -> new TrainingTypeResponseDTO(
+                        entity.getId(),
+                        entity.getTrainingTypeName().getValue()
+                ))
+                .distinct()
+                .toList();
     }
 
     @Transactional(readOnly = true)
@@ -91,6 +114,7 @@ public class TrainerService {
 
         TrainerEntity trainer = trainerRepository.findByUserUsername(username)
                 .orElseThrow(() -> new NotFoundException("Trainer not found"));
+
 
         UserEntity user = trainer.getUser();
 

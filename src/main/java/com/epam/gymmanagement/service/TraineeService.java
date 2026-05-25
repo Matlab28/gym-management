@@ -11,6 +11,7 @@ import com.epam.gymmanagement.entity.TrainerEntity;
 import com.epam.gymmanagement.entity.UserEntity;
 import com.epam.gymmanagement.exception.BadRequestException;
 import com.epam.gymmanagement.exception.NotFoundException;
+import com.epam.gymmanagement.metrics.TraineeMetrics;
 import com.epam.gymmanagement.repository.TraineeRepository;
 import com.epam.gymmanagement.repository.TrainerRepository;
 import com.epam.gymmanagement.repository.UserRepository;
@@ -40,6 +41,7 @@ public class TraineeService {
     private final GymMapper gymMapper;
     private final SecurityService securityService;
     private final ModelMapper modelMapper;
+    private final TraineeMetrics traineeMetrics;
 
     @Transactional
     public RegistrationResponseDTO registerTrainee(TraineeRegistrationRequestDTO request) {
@@ -58,15 +60,15 @@ public class TraineeService {
 
         UserEntity savedUser = userRepository.save(entity);
 
-        TraineeEntity trainee = new TraineeEntity();
-        trainee.setUserEntity(savedUser);
-        trainee.setDateOfBirth(request.getDateOfBirth());
-        trainee.setAddress(request.getAddress());
+        TraineeEntity trainee = TraineeEntity.builder()
+                .userEntity(savedUser)
+                .dateOfBirth(request.getDateOfBirth())
+                .address(request.getAddress())
+                .build();
 
         traineeRepository.save(trainee);
-
+        traineeMetrics.getTraineeCreatedCounter().increment();
         log.info("Registered trainee profile for username={}", username);
-
         return new RegistrationResponseDTO(username, rawPassword);
     }
 
@@ -81,10 +83,7 @@ public class TraineeService {
     }
 
     @Transactional
-    public TraineeProfileResponseDTO updateTraineeProfile(
-            String username,
-            UpdateTraineeProfileRequestDTO request
-    ) {
+    public TraineeProfileResponseDTO updateTraineeProfile(String username, UpdateTraineeProfileRequestDTO request) {
         securityService.requireSelfOrAdmin(username, UserRole.TRAINEE);
 
         TraineeEntity trainee = traineeRepository.findByUserEntity_Username(username)
@@ -102,8 +101,8 @@ public class TraineeService {
         userRepository.save(user);
         TraineeEntity updatedTrainee = traineeRepository.save(trainee);
 
+        traineeMetrics.getTraineeUpdatedCounter().increment();
         log.info("Updated trainee profile for username={}", username);
-
         return gymMapper.toTraineeProfileResponse(updatedTrainee);
     }
 
@@ -120,19 +119,33 @@ public class TraineeService {
         traineeRepository.delete(trainee);
         userRepository.delete(user);
 
+        traineeMetrics.getTraineeDeletedCounter().increment();
         log.info("Deleted trainee profile for username={}", username);
-
         return new MessageResponseDTO("Trainee profile deleted successfully");
     }
 
     @Transactional
     public MessageResponseDTO activateTraineeProfile(String username) {
-        return changeTraineeStatus(username, true, "Trainee profile activated successfully");
+        MessageResponseDTO response = changeTraineeStatus(
+                username,
+                true,
+                "Trainee profile activated successfully"
+        );
+
+        traineeMetrics.getTraineeActivatedCounter().increment();
+        return response;
     }
 
     @Transactional
     public MessageResponseDTO deactivateTraineeProfile(String username) {
-        return changeTraineeStatus(username, false, "Trainee profile deactivated successfully");
+        MessageResponseDTO response = changeTraineeStatus(
+                username,
+                false,
+                "Trainee profile deactivated successfully"
+        );
+
+        traineeMetrics.getTraineeDeactivatedCounter().increment();
+        return response;
     }
 
     @Transactional(readOnly = true)
@@ -155,10 +168,7 @@ public class TraineeService {
     }
 
     @Transactional
-    public TrainerAssignmentResponseDTO updateTraineeTrainers(
-            String traineeUsername,
-            UpdateTraineeTrainersRequestDTO request
-    ) {
+    public TrainerAssignmentResponseDTO updateTraineeTrainers(String traineeUsername, UpdateTraineeTrainersRequestDTO request) {
         securityService.requireSelfOrAdmin(traineeUsername, UserRole.TRAINEE);
 
         TraineeEntity trainee = traineeRepository.findByUserEntity_Username(traineeUsername)
@@ -191,8 +201,8 @@ public class TraineeService {
                 .map(gymMapper::toTrainerShortResponse)
                 .toList();
 
+        traineeMetrics.getTraineeTrainerAssignmentUpdatedCounter().increment();
         log.info("Updated trainer assignments for trainee username={}", traineeUsername);
-
         return new TrainerAssignmentResponseDTO(trainerResponses);
     }
 
@@ -210,9 +220,7 @@ public class TraineeService {
 
         user.setIsActive(active);
         userRepository.save(user);
-
         log.info("{} trainee profile for username={}", active ? "Activated" : "Deactivated", username);
-
         return new MessageResponseDTO(successMessage);
     }
 }

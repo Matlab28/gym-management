@@ -34,7 +34,8 @@ public class SecurityConfig {
             "/swagger-ui.html",
             "/webjars/**",
             "/h2-console",
-            "/h2-console/**"
+            "/h2-console/**",
+            "/actuator/**"
     };
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
@@ -82,7 +83,7 @@ public class SecurityConfig {
         ));
 
         configuration.setAllowedMethods(List.of(
-                "GET", "POST", "PUT", "DELETE", "OPTIONS"
+                "GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"
         ));
 
         configuration.setAllowedHeaders(List.of("*"));
