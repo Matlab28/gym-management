@@ -79,13 +79,15 @@ public class TrainingService {
             throw new BadRequestException("Trainer profile is inactive");
         }
 
-        TrainingEntity training = new TrainingEntity();
-        training.setTrainee(trainee);
-        training.setTrainer(trainer);
-        training.setTrainingName(request.getTrainingName());
-        training.setTrainingDate(request.getTrainingDate());
-        training.setTrainingType(trainingType);
-        training.setTrainingDuration(request.getTrainingDuration());
+        TrainingEntity training = TrainingEntity
+                .builder()
+                .trainee(trainee)
+                .trainer(trainer)
+                .trainingName(request.getTrainingName())
+                .trainingDate(request.getTrainingDate())
+                .trainingType(trainingType)
+                .trainingDuration(request.getTrainingDuration())
+                .build();
 
         trainingRepository.save(training);
 

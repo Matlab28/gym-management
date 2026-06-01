@@ -62,14 +62,6 @@ public class TrainerService {
         entity.setIsActive(true);
         entity.setRole(UserRole.TRAINER);
 
-//        UserEntity user = new UserEntity();
-//        user.setFirstName(request.getFirstName());
-//        user.setLastName(request.getLastName());
-//        user.setUsername(username);
-//        user.setPassword(passwordEncoder.encode(rawPassword));
-//        user.setIsActive(true);
-//        user.setRole(UserRole.TRAINER);
-
         UserEntity savedUser = userRepository.save(entity);
 
         TrainerEntity trainer = new TrainerEntity();
@@ -106,21 +98,19 @@ public class TrainerService {
     }
 
     @Transactional
-    public TrainerProfileResponseDTO updateTrainerProfile(
-            String username,
-            UpdateTrainerProfileRequestDTO request
-    ) {
+    public TrainerProfileResponseDTO updateTrainerProfile(String username, UpdateTrainerProfileRequestDTO request) {
         securityService.requireSelfOrAdmin(username, UserRole.TRAINER);
 
         TrainerEntity trainer = trainerRepository.findByUserUsername(username)
                 .orElseThrow(() -> new NotFoundException("Trainer not found"));
 
 
-        UserEntity user = trainer.getUser();
-
-        user.setFirstName(request.getFirstName());
-        user.setLastName(request.getLastName());
-        user.setIsActive(request.getIsActive());
+        UserEntity user = UserEntity
+                .builder()
+                .firstName(request.getFirstName())
+                .lastName(request.getLastName())
+                .isActive(request.getIsActive())
+                .build();
 
         userRepository.save(user);
 
@@ -149,11 +139,7 @@ public class TrainerService {
         }
     }
 
-    private MessageResponseDTO changeTrainerStatus(
-            String username,
-            boolean active,
-            String successMessage
-    ) {
+    private MessageResponseDTO changeTrainerStatus(String username, boolean active, String successMessage) {
         securityService.requireSelfOrAdmin(username, UserRole.TRAINER);
 
         TrainerEntity trainer = trainerRepository.findByUserUsername(username)
