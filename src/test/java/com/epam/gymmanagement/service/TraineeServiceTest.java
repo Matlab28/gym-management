@@ -12,12 +12,15 @@ import com.epam.gymmanagement.entity.TrainerEntity;
 import com.epam.gymmanagement.entity.UserEntity;
 import com.epam.gymmanagement.exception.BadRequestException;
 import com.epam.gymmanagement.exception.NotFoundException;
+import com.epam.gymmanagement.metrics.TraineeMetrics;
 import com.epam.gymmanagement.repository.TraineeRepository;
 import com.epam.gymmanagement.repository.TrainerRepository;
 import com.epam.gymmanagement.repository.UserRepository;
 import com.epam.gymmanagement.security.SecurityService;
 import com.epam.gymmanagement.util.PasswordGenerator;
 import com.epam.gymmanagement.util.UsernameGenerator;
+import io.micrometer.core.instrument.Counter;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -55,9 +58,23 @@ class TraineeServiceTest {
     private SecurityService securityService;
     @Mock
     private ModelMapper modelMapper;
+    @Mock
+    private TraineeMetrics traineeMetrics;
+    @Mock
+    private Counter traineeMetricCounter;
 
     @InjectMocks
     private TraineeService traineeService;
+
+    @BeforeEach
+    void setUpMetrics() {
+        lenient().when(traineeMetrics.getTraineeCreatedCounter()).thenReturn(traineeMetricCounter);
+        lenient().when(traineeMetrics.getTraineeUpdatedCounter()).thenReturn(traineeMetricCounter);
+        lenient().when(traineeMetrics.getTraineeDeletedCounter()).thenReturn(traineeMetricCounter);
+        lenient().when(traineeMetrics.getTraineeActivatedCounter()).thenReturn(traineeMetricCounter);
+        lenient().when(traineeMetrics.getTraineeDeactivatedCounter()).thenReturn(traineeMetricCounter);
+        lenient().when(traineeMetrics.getTraineeTrainerAssignmentUpdatedCounter()).thenReturn(traineeMetricCounter);
+    }
 
     @Test
     void registerTraineeCreatesUserAndTraineeProfile() {

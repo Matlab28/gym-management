@@ -21,7 +21,7 @@ public class TrainerEntity {
 
     @OneToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "user_id", nullable = false, unique = true)
-    private UserEntity user;
+    private UserEntity userEntity;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "specialization_id", nullable = false)

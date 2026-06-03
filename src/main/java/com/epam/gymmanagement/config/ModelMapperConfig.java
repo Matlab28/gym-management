@@ -40,9 +40,9 @@ public class ModelMapperConfig {
         modelMapper.createTypeMap(TrainerEntity.class, TrainerShortResponseDTO.class)
                 .addMappings(mapper -> {
                     mapper.map(TrainerEntity::getId, TrainerShortResponseDTO::setTrainerId);
-                    mapper.map(source -> source.getUser().getUsername(), TrainerShortResponseDTO::setTrainerUsername);
-                    mapper.map(source -> source.getUser().getFirstName(), TrainerShortResponseDTO::setTrainerFirstName);
-                    mapper.map(source -> source.getUser().getLastName(), TrainerShortResponseDTO::setTrainerLastName);
+                    mapper.map(source -> source.getUserEntity().getUsername(), TrainerShortResponseDTO::setTrainerUsername);
+                    mapper.map(source -> source.getUserEntity().getFirstName(), TrainerShortResponseDTO::setTrainerFirstName);
+                    mapper.map(source -> source.getUserEntity().getLastName(), TrainerShortResponseDTO::setTrainerLastName);
                     mapper.using(trainingTypeName)
                             .map(TrainerEntity::getSpecialization, TrainerShortResponseDTO::setTrainerSpecialization);
                 });
@@ -50,10 +50,10 @@ public class ModelMapperConfig {
         modelMapper.createTypeMap(TrainerEntity.class, TrainerProfileResponseDTO.class)
                 .addMappings(mapper -> {
                     mapper.map(TrainerEntity::getId, TrainerProfileResponseDTO::setTrainerId);
-                    mapper.map(source -> source.getUser().getUsername(), TrainerProfileResponseDTO::setUsername);
-                    mapper.map(source -> source.getUser().getFirstName(), TrainerProfileResponseDTO::setFirstName);
-                    mapper.map(source -> source.getUser().getLastName(), TrainerProfileResponseDTO::setLastName);
-                    mapper.map(source -> source.getUser().getIsActive(), TrainerProfileResponseDTO::setIsActive);
+                    mapper.map(source -> source.getUserEntity().getUsername(), TrainerProfileResponseDTO::setUsername);
+                    mapper.map(source -> source.getUserEntity().getFirstName(), TrainerProfileResponseDTO::setFirstName);
+                    mapper.map(source -> source.getUserEntity().getLastName(), TrainerProfileResponseDTO::setLastName);
+                    mapper.map(source -> source.getUserEntity().getIsActive(), TrainerProfileResponseDTO::setIsActive);
                     mapper.using(trainingTypeName)
                             .map(TrainerEntity::getSpecialization, TrainerProfileResponseDTO::setSpecialization);
                     mapper.skip(TrainerProfileResponseDTO::setTrainees);
@@ -88,10 +88,10 @@ public class ModelMapperConfig {
 
         Converter<TrainerEntity, String> trainerFullName = context -> {
             TrainerEntity trainer = context.getSource();
-            if (trainer == null || trainer.getUser() == null) {
+            if (trainer == null || trainer.getUserEntity() == null) {
                 return null;
             }
-            return trainer.getUser().getFirstName() + " " + trainer.getUser().getLastName();
+            return trainer.getUserEntity().getFirstName() + " " + trainer.getUserEntity().getLastName();
         };
 
         Converter<TraineeEntity, String> traineeFullName = context -> {

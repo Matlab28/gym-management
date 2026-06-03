@@ -24,6 +24,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.modelmapper.ModelMapper;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Optional;
@@ -54,6 +55,8 @@ class TrainerServiceTest {
     private GymMapper gymMapper;
     @Mock
     private SecurityService securityService;
+    @Mock
+    private ModelMapper modelMapper;
 
     @InjectMocks
     private TrainerService trainerService;
@@ -62,11 +65,15 @@ class TrainerServiceTest {
     void registerTrainerCreatesUserAndTrainerProfile() {
         TrainerRegistrationRequestDTO request = registrationRequest("Jane", "Trainer", "Yoga");
         TrainingTypeEntity specialization = ServiceTestFixtures.trainingType(TrainingType.YOGA);
+        UserEntity mappedUser = new UserEntity();
+        mappedUser.setFirstName("Jane");
+        mappedUser.setLastName("Trainer");
 
         when(trainingTypeRepository.findByTrainingTypeName(TrainingType.YOGA))
                 .thenReturn(Optional.of(specialization));
         when(usernameGenerator.generate("Jane", "Trainer")).thenReturn("jane.trainer");
         when(passwordGenerator.generate()).thenReturn("RawPass1");
+        when(modelMapper.map(request, UserEntity.class)).thenReturn(mappedUser);
         when(passwordEncoder.encode("RawPass1")).thenReturn("encoded-pass");
         when(userRepository.save(any(UserEntity.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
@@ -87,7 +94,7 @@ class TrainerServiceTest {
 
         ArgumentCaptor<TrainerEntity> trainerCaptor = ArgumentCaptor.forClass(TrainerEntity.class);
         verify(trainerRepository).save(trainerCaptor.capture());
-        assertEquals(savedUser, trainerCaptor.getValue().getUser());
+        assertEquals(savedUser, trainerCaptor.getValue().getUserEntity());
         assertEquals(specialization, trainerCaptor.getValue().getSpecialization());
     }
 
@@ -139,11 +146,11 @@ class TrainerServiceTest {
         TrainerProfileResponseDTO response = trainerService.updateTrainerProfile("trainer.user", request);
 
         assertEquals(mapped, response);
-        assertEquals("Updated", trainer.getUser().getFirstName());
-        assertEquals("Trainer", trainer.getUser().getLastName());
-        assertEquals(false, trainer.getUser().getIsActive());
+        assertEquals("Updated", trainer.getUserEntity().getFirstName());
+        assertEquals("Trainer", trainer.getUserEntity().getLastName());
+        assertEquals(false, trainer.getUserEntity().getIsActive());
         verify(securityService).requireSelfOrAdmin("trainer.user", UserRole.TRAINER);
-        verify(userRepository).save(trainer.getUser());
+        verify(userRepository).save(trainer.getUserEntity());
     }
 
     @Test
@@ -164,8 +171,8 @@ class TrainerServiceTest {
         MessageResponseDTO response = trainerService.activateTrainerProfile("trainer.user");
 
         assertEquals("Trainer profile activated successfully", response.getMessage());
-        assertTrue(trainer.getUser().getIsActive());
-        verify(userRepository).save(trainer.getUser());
+        assertTrue(trainer.getUserEntity().getIsActive());
+        verify(userRepository).save(trainer.getUserEntity());
         verify(securityService).requireSelfOrAdmin("trainer.user", UserRole.TRAINER);
     }
 
@@ -187,8 +194,8 @@ class TrainerServiceTest {
         MessageResponseDTO response = trainerService.deactivateTrainerProfile("trainer.user");
 
         assertEquals("Trainer profile deactivated successfully", response.getMessage());
-        assertEquals(false, trainer.getUser().getIsActive());
-        verify(userRepository).save(trainer.getUser());
+        assertEquals(false, trainer.getUserEntity().getIsActive());
+        verify(userRepository).save(trainer.getUserEntity());
     }
 
     @Test

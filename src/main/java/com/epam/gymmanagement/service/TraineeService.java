@@ -186,7 +186,7 @@ public class TraineeService {
         }
 
         boolean allTrainersActive = trainers.stream()
-                .allMatch(trainer -> Boolean.TRUE.equals(trainer.getUser().getIsActive()));
+                .allMatch(trainer -> Boolean.TRUE.equals(trainer.getUserEntity().getIsActive()));
 
         if (!allTrainersActive) {
             throw new BadRequestException("Only active trainers can be assigned to trainee");

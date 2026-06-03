@@ -1,0 +1,12 @@
+spring:
+  datasource:
+    url: ${DEV_DB_URL:jdbc:postgresql://localhost:5432/gym_management_dev}
+    driver-class-name: org.postgresql.Driver
+    username: ${DEV_DB_USERNAME:gym_dev}
+    password: ${DEV_DB_PASSWORD:gym_dev_password}
+  jpa:
+    hibernate:
+      ddl-auto: update
+  h2:
+    console:
+      enabled: false

@@ -35,7 +35,10 @@ public class SecurityConfig {
             "/webjars/**",
             "/h2-console",
             "/h2-console/**",
-            "/actuator/**"
+            "/actuator/**",
+            "/actuator/health/**",
+            "/actuator/info",
+            "/actuator/prometheus"
     };
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
 

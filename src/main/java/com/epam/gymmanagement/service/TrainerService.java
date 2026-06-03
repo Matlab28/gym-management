@@ -65,7 +65,7 @@ public class TrainerService {
         UserEntity savedUser = userRepository.save(entity);
 
         TrainerEntity trainer = new TrainerEntity();
-        trainer.setUser(savedUser);
+        trainer.setUserEntity(savedUser);
         trainer.setSpecialization(specialization);
 
         trainerRepository.save(trainer);
@@ -105,12 +105,10 @@ public class TrainerService {
                 .orElseThrow(() -> new NotFoundException("Trainer not found"));
 
 
-        UserEntity user = UserEntity
-                .builder()
-                .firstName(request.getFirstName())
-                .lastName(request.getLastName())
-                .isActive(request.getIsActive())
-                .build();
+        UserEntity user = trainer.getUserEntity();
+        user.setFirstName(request.getFirstName());
+        user.setLastName(request.getLastName());
+        user.setIsActive(request.getIsActive());
 
         userRepository.save(user);
 
@@ -145,7 +143,7 @@ public class TrainerService {
         TrainerEntity trainer = trainerRepository.findByUserUsername(username)
                 .orElseThrow(() -> new NotFoundException("Trainer not found"));
 
-        UserEntity user = trainer.getUser();
+        UserEntity user = trainer.getUserEntity();
 
         if (Boolean.TRUE.equals(user.getIsActive()) == active) {
             throw new BadRequestException("Trainer profile is already " + (active ? "active" : "inactive"));

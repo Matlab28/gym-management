@@ -2,6 +2,8 @@ package com.epam.gymmanagement.repository;
 
 import com.epam.gymmanagement.constant.TrainingType;
 import com.epam.gymmanagement.entity.TrainingEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -15,7 +17,9 @@ import java.util.UUID;
 public interface TrainingRepository extends JpaRepository<TrainingEntity, UUID> {
     List<TrainingEntity> findByTrainee_UserEntity_Username(String username);
 
-    List<TrainingEntity> findByTrainerUserUsername(String username);
+    List<TrainingEntity> findByTrainer_UserEntity_Username(String username);
+
+    Page<TrainingEntity> findAllPaginated(Pageable pageable);
 
     @Query("""
             SELECT t FROM TrainingEntity t

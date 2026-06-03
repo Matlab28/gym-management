@@ -75,7 +75,7 @@ public class TrainingService {
             throw new BadRequestException("Trainee profile is inactive");
         }
 
-        if (!Boolean.TRUE.equals(trainer.getUser().getIsActive())) {
+        if (!Boolean.TRUE.equals(trainer.getUserEntity().getIsActive())) {
             throw new BadRequestException("Trainer profile is inactive");
         }
 
@@ -146,6 +146,8 @@ public class TrainingService {
                 .map(gymMapper::toTrainingResponse)
                 .toList();
     }
+
+    public List<TrainingResponseDTO>
 
     private TrainingType parseTrainingType(String trainingType) {
         try {
