@@ -10,11 +10,11 @@ import java.util.UUID;
 
 @Repository
 public interface TrainerRepository extends JpaRepository<TrainerEntity, UUID> {
-    Optional<TrainerEntity> findByUserUsername(String username);
+    Optional<TrainerEntity> findByUserEntity_Username(String username);
 
-    boolean existsByUserUsername(String username);
+    boolean existsByUserEntity_Username(String username);
 
-    List<TrainerEntity> findByUserIsActiveTrue();
+    List<TrainerEntity> findByUserEntity_IsActiveTrue();
 
-    List<TrainerEntity> findByUserUsernameIn(List<String> usernames);
+    List<TrainerEntity> findByUserEntity_UsernameIn(List<String> usernames);
 }

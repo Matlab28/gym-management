@@ -124,7 +124,7 @@ class TrainerServiceTest {
         TrainerEntity trainer = ServiceTestFixtures.trainer("trainer.user", true, TrainingType.FITNESS);
         TrainerProfileResponseDTO mapped = new TrainerProfileResponseDTO();
 
-        when(trainerRepository.findByUserUsername("trainer.user")).thenReturn(Optional.of(trainer));
+        when(trainerRepository.findByUserEntity_Username("trainer.user")).thenReturn(Optional.of(trainer));
         when(gymMapper.toTrainerProfileResponse(trainer)).thenReturn(mapped);
 
         TrainerProfileResponseDTO response = trainerService.getTrainerProfile("trainer.user");
@@ -139,7 +139,7 @@ class TrainerServiceTest {
         UpdateTrainerProfileRequestDTO request = updateRequest("Updated", "Trainer", false);
         TrainerProfileResponseDTO mapped = new TrainerProfileResponseDTO();
 
-        when(trainerRepository.findByUserUsername("trainer.user")).thenReturn(Optional.of(trainer));
+        when(trainerRepository.findByUserEntity_Username("trainer.user")).thenReturn(Optional.of(trainer));
         when(trainerRepository.save(trainer)).thenReturn(trainer);
         when(gymMapper.toTrainerProfileResponse(trainer)).thenReturn(mapped);
 
@@ -156,7 +156,7 @@ class TrainerServiceTest {
     @Test
     void updateTrainerProfileThrowsWhenTrainerDoesNotExist() {
         UpdateTrainerProfileRequestDTO request = updateRequest("Updated", "Trainer", true);
-        when(trainerRepository.findByUserUsername("missing.trainer")).thenReturn(Optional.empty());
+        when(trainerRepository.findByUserEntity_Username("missing.trainer")).thenReturn(Optional.empty());
 
         assertThrows(NotFoundException.class, () -> trainerService.updateTrainerProfile("missing.trainer", request));
 
@@ -166,7 +166,7 @@ class TrainerServiceTest {
     @Test
     void activateTrainerProfileChangesInactiveProfileToActive() {
         TrainerEntity trainer = ServiceTestFixtures.trainer("trainer.user", false, TrainingType.FITNESS);
-        when(trainerRepository.findByUserUsername("trainer.user")).thenReturn(Optional.of(trainer));
+        when(trainerRepository.findByUserEntity_Username("trainer.user")).thenReturn(Optional.of(trainer));
 
         MessageResponseDTO response = trainerService.activateTrainerProfile("trainer.user");
 
@@ -179,7 +179,7 @@ class TrainerServiceTest {
     @Test
     void activateTrainerProfileThrowsWhenAlreadyActive() {
         TrainerEntity trainer = ServiceTestFixtures.trainer("trainer.user", true, TrainingType.FITNESS);
-        when(trainerRepository.findByUserUsername("trainer.user")).thenReturn(Optional.of(trainer));
+        when(trainerRepository.findByUserEntity_Username("trainer.user")).thenReturn(Optional.of(trainer));
 
         assertThrows(BadRequestException.class, () -> trainerService.activateTrainerProfile("trainer.user"));
 
@@ -189,7 +189,7 @@ class TrainerServiceTest {
     @Test
     void deactivateTrainerProfileChangesActiveProfileToInactive() {
         TrainerEntity trainer = ServiceTestFixtures.trainer("trainer.user", true, TrainingType.FITNESS);
-        when(trainerRepository.findByUserUsername("trainer.user")).thenReturn(Optional.of(trainer));
+        when(trainerRepository.findByUserEntity_Username("trainer.user")).thenReturn(Optional.of(trainer));
 
         MessageResponseDTO response = trainerService.deactivateTrainerProfile("trainer.user");
 
@@ -201,7 +201,7 @@ class TrainerServiceTest {
     @Test
     void deactivateTrainerProfileThrowsWhenAlreadyInactive() {
         TrainerEntity trainer = ServiceTestFixtures.trainer("trainer.user", false, TrainingType.FITNESS);
-        when(trainerRepository.findByUserUsername("trainer.user")).thenReturn(Optional.of(trainer));
+        when(trainerRepository.findByUserEntity_Username("trainer.user")).thenReturn(Optional.of(trainer));
 
         assertThrows(BadRequestException.class, () -> trainerService.deactivateTrainerProfile("trainer.user"));
 

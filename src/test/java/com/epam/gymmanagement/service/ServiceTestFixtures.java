@@ -39,7 +39,7 @@ final class ServiceTestFixtures {
     static TrainerEntity trainer(String username, boolean active, TrainingType specialization) {
         return TrainerEntity.builder()
                 .id(UUID.randomUUID())
-                .user(user(username, UserRole.TRAINER, active))
+                .userEntity(user(username, UserRole.TRAINER, active))
                 .specialization(trainingType(specialization))
                 .trainees(new ArrayList<>())
                 .trainings(new ArrayList<>())

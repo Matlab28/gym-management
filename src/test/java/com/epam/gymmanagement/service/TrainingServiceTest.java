@@ -62,7 +62,7 @@ class TrainingServiceTest {
 
         when(securityService.hasRole(UserRole.ADMIN)).thenReturn(true);
         when(traineeRepository.findByUserEntity_Username("trainee.user")).thenReturn(Optional.of(trainee));
-        when(trainerRepository.findByUserUsername("trainer.user")).thenReturn(Optional.of(trainer));
+        when(trainerRepository.findByUserEntity_Username("trainer.user")).thenReturn(Optional.of(trainer));
         when(trainingTypeRepository.findByTrainingTypeName(TrainingType.YOGA)).thenReturn(Optional.of(trainingType));
 
         MessageResponseDTO response = trainingService.addTraining(request);
@@ -103,7 +103,7 @@ class TrainingServiceTest {
 
         when(securityService.hasRole(UserRole.ADMIN)).thenReturn(true);
         when(traineeRepository.findByUserEntity_Username("trainee.user")).thenReturn(Optional.of(trainee));
-        when(trainerRepository.findByUserUsername("trainer.user")).thenReturn(Optional.of(trainer));
+        when(trainerRepository.findByUserEntity_Username("trainer.user")).thenReturn(Optional.of(trainer));
         when(trainingTypeRepository.findByTrainingTypeName(TrainingType.YOGA)).thenReturn(Optional.of(trainingType));
 
         assertThrows(BadRequestException.class, () -> trainingService.addTraining(request));
@@ -120,7 +120,7 @@ class TrainingServiceTest {
 
         when(securityService.hasRole(UserRole.ADMIN)).thenReturn(true);
         when(traineeRepository.findByUserEntity_Username("trainee.user")).thenReturn(Optional.of(trainee));
-        when(trainerRepository.findByUserUsername("trainer.user")).thenReturn(Optional.of(trainer));
+        when(trainerRepository.findByUserEntity_Username("trainer.user")).thenReturn(Optional.of(trainer));
         when(trainingTypeRepository.findByTrainingTypeName(TrainingType.YOGA)).thenReturn(Optional.of(trainingType));
 
         assertThrows(BadRequestException.class, () -> trainingService.addTraining(request));
@@ -137,7 +137,7 @@ class TrainingServiceTest {
 
         when(securityService.hasRole(UserRole.ADMIN)).thenReturn(true);
         when(traineeRepository.findByUserEntity_Username("trainee.user")).thenReturn(Optional.of(trainee));
-        when(trainerRepository.findByUserUsername("trainer.user")).thenReturn(Optional.of(trainer));
+        when(trainerRepository.findByUserEntity_Username("trainer.user")).thenReturn(Optional.of(trainer));
         when(trainingTypeRepository.findByTrainingTypeName(TrainingType.YOGA)).thenReturn(Optional.of(trainingType));
 
         assertThrows(BadRequestException.class, () -> trainingService.addTraining(request));
@@ -235,7 +235,7 @@ class TrainingServiceTest {
         );
         TrainingResponseDTO mapped = new TrainingResponseDTO();
 
-        when(trainerRepository.existsByUserUsername("trainer.user")).thenReturn(true);
+        when(trainerRepository.existsByUserEntity_Username("trainer.user")).thenReturn(true);
         when(trainingRepository.findTrainerTrainings("trainer.user", from, to, "Tina Trainee"))
                 .thenReturn(List.of(training));
         when(gymMapper.toTrainingResponse(training)).thenReturn(mapped);
@@ -255,7 +255,7 @@ class TrainingServiceTest {
 
         assertThrows(BadRequestException.class, () -> trainingService.getTrainerTrainings(request));
 
-        verify(trainerRepository, never()).existsByUserUsername("trainer.user");
+        verify(trainerRepository, never()).existsByUserEntity_Username("trainer.user");
         verifyNoInteractions(trainingRepository);
     }
 
@@ -265,7 +265,7 @@ class TrainingServiceTest {
                 LocalDate.of(2026, 1, 1),
                 LocalDate.of(2026, 1, 31)
         );
-        when(trainerRepository.existsByUserUsername("trainer.user")).thenReturn(false);
+        when(trainerRepository.existsByUserEntity_Username("trainer.user")).thenReturn(false);
 
         assertThrows(NotFoundException.class, () -> trainingService.getTrainerTrainings(request));
 

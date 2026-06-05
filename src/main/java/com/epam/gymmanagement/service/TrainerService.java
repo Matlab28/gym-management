@@ -91,7 +91,7 @@ public class TrainerService {
     public TrainerProfileResponseDTO getTrainerProfile(String username) {
         securityService.requireSelfOrAdmin(username, UserRole.TRAINER);
 
-        TrainerEntity trainer = trainerRepository.findByUserUsername(username)
+        TrainerEntity trainer = trainerRepository.findByUserEntity_Username(username)
                 .orElseThrow(() -> new NotFoundException("Trainer not found"));
 
         return gymMapper.toTrainerProfileResponse(trainer);
@@ -101,9 +101,8 @@ public class TrainerService {
     public TrainerProfileResponseDTO updateTrainerProfile(String username, UpdateTrainerProfileRequestDTO request) {
         securityService.requireSelfOrAdmin(username, UserRole.TRAINER);
 
-        TrainerEntity trainer = trainerRepository.findByUserUsername(username)
+        TrainerEntity trainer = trainerRepository.findByUserEntity_Username(username)
                 .orElseThrow(() -> new NotFoundException("Trainer not found"));
-
 
         UserEntity user = trainer.getUserEntity();
         user.setFirstName(request.getFirstName());
@@ -111,11 +110,8 @@ public class TrainerService {
         user.setIsActive(request.getIsActive());
 
         userRepository.save(user);
-
         TrainerEntity updatedTrainer = trainerRepository.save(trainer);
-
         log.info("Updated trainer profile for username={}", username);
-
         return gymMapper.toTrainerProfileResponse(updatedTrainer);
     }
 
@@ -140,7 +136,7 @@ public class TrainerService {
     private MessageResponseDTO changeTrainerStatus(String username, boolean active, String successMessage) {
         securityService.requireSelfOrAdmin(username, UserRole.TRAINER);
 
-        TrainerEntity trainer = trainerRepository.findByUserUsername(username)
+        TrainerEntity trainer = trainerRepository.findByUserEntity_Username(username)
                 .orElseThrow(() -> new NotFoundException("Trainer not found"));
 
         UserEntity user = trainer.getUserEntity();

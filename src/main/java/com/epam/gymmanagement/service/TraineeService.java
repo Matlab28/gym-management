@@ -160,7 +160,7 @@ public class TraineeService {
                 .map(TrainerEntity::getId)
                 .toList();
 
-        return trainerRepository.findByUserIsActiveTrue()
+        return trainerRepository.findByUserEntity_IsActiveTrue()
                 .stream()
                 .filter(trainer -> !assignedTrainerIds.contains(trainer.getId()))
                 .map(gymMapper::toTrainerShortResponse)
@@ -179,7 +179,7 @@ public class TraineeService {
                 .map(TrainerUsernameRequestDTO::getTrainerUsername)
                 .toList();
 
-        List<TrainerEntity> trainers = trainerRepository.findByUserUsernameIn(trainerUsernames);
+        List<TrainerEntity> trainers = trainerRepository.findByUserEntity_UsernameIn(trainerUsernames);
 
         if (trainers.size() != trainerUsernames.size()) {
             throw new NotFoundException("One or more trainers were not found");

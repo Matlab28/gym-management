@@ -2,8 +2,6 @@ package com.epam.gymmanagement.repository;
 
 import com.epam.gymmanagement.constant.TrainingType;
 import com.epam.gymmanagement.entity.TrainingEntity;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -15,19 +13,13 @@ import java.util.UUID;
 
 @Repository
 public interface TrainingRepository extends JpaRepository<TrainingEntity, UUID> {
-    List<TrainingEntity> findByTrainee_UserEntity_Username(String username);
-
-    List<TrainingEntity> findByTrainer_UserEntity_Username(String username);
-
-    Page<TrainingEntity> findAllPaginated(Pageable pageable);
-
     @Query("""
             SELECT t FROM TrainingEntity t
             WHERE t.trainee.userEntity.username = :username
             AND (:periodFrom IS NULL OR t.trainingDate >= :periodFrom)
             AND (:periodTo IS NULL OR t.trainingDate <= :periodTo)
             AND (:trainerName IS NULL OR
-                 LOWER(CONCAT(t.trainer.user.firstName, ' ', t.trainer.user.lastName))
+                 LOWER(CONCAT(t.trainer.userEntity.firstName, ' ', t.trainer.userEntity.lastName))
                  LIKE LOWER(CONCAT('%', :trainerName, '%')))
             AND (:trainingType IS NULL OR t.trainingType.trainingTypeName = :trainingType)
             ORDER BY t.trainingDate DESC
@@ -42,7 +34,7 @@ public interface TrainingRepository extends JpaRepository<TrainingEntity, UUID> 
 
     @Query("""
             SELECT t FROM TrainingEntity t
-            WHERE t.trainer.user.username = :username
+            WHERE t.trainer.userEntity.username = :username
             AND (:periodFrom IS NULL OR t.trainingDate >= :periodFrom)
             AND (:periodTo IS NULL OR t.trainingDate <= :periodTo)
             AND (:traineeName IS NULL OR

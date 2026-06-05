@@ -20,6 +20,7 @@ import com.epam.gymmanagement.repository.TrainingTypeRepository;
 import com.epam.gymmanagement.security.SecurityService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -43,7 +44,7 @@ public class TrainingService {
 
         if (!securityService.hasRole(UserRole.ADMIN)
                 && !securityService.currentUsername().equals(request.getTrainerUsername())) {
-            throw new org.springframework.security.access.AccessDeniedException("Trainer can add only own trainings");
+            throw new AccessDeniedException("Trainer can add only own trainings");
         }
 
         TraineeEntity trainee = traineeRepository
@@ -51,7 +52,7 @@ public class TrainingService {
                 .orElseThrow(() -> new NotFoundException("Trainee not found"));
 
         TrainerEntity trainer = trainerRepository
-                .findByUserUsername(request.getTrainerUsername())
+                .findByUserEntity_Username(request.getTrainerUsername())
                 .orElseThrow(() -> new NotFoundException("Trainer not found"));
 
         TrainingType requestedTrainingType = parseTrainingType(request.getTrainingType());
@@ -90,14 +91,12 @@ public class TrainingService {
                 .build();
 
         trainingRepository.save(training);
-
         log.info(
-                "Added training name={} trainee={} trainer={}",
+                "Added training name: \"{}\" trainee: \"{}\" trainer: \"{}\"",
                 request.getTrainingName(),
                 request.getTraineeUsername(),
                 request.getTrainerUsername()
         );
-
         return new MessageResponseDTO("Training added successfully");
     }
 
@@ -110,14 +109,12 @@ public class TrainingService {
             throw new NotFoundException("Trainee not found");
         }
 
-        TrainingType normalizedTrainingType = normalizeTrainingType(dto.getTrainingType());
-
         List<TrainingEntity> trainings = trainingRepository.findTraineeTrainings(
                 dto.getUsername(),
                 dto.getPeriodFrom(),
                 dto.getPeriodTo(),
                 dto.getTrainerName(),
-                normalizedTrainingType
+                dto.getTrainingType()
         );
 
         return trainings
@@ -131,7 +128,7 @@ public class TrainingService {
         securityService.requireSelfOrAdmin(dto.getUsername(), UserRole.TRAINER);
         validatePeriod(dto.getPeriodFrom(), dto.getPeriodTo());
 
-        if (!trainerRepository.existsByUserUsername(dto.getUsername())) {
+        if (!trainerRepository.existsByUserEntity_Username(dto.getUsername())) {
             throw new NotFoundException("Trainer not found");
         }
 
@@ -147,18 +144,12 @@ public class TrainingService {
                 .toList();
     }
 
-    public List<TrainingResponseDTO>
-
     private TrainingType parseTrainingType(String trainingType) {
         try {
             return TrainingType.fromValue(trainingType);
         } catch (IllegalArgumentException exception) {
             throw new BadRequestException(exception.getMessage());
         }
-    }
-
-    private TrainingType normalizeTrainingType(TrainingType trainingType) {
-        return trainingType;
     }
 
     private void validatePeriod(LocalDate periodFrom, LocalDate periodTo) {

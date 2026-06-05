@@ -219,7 +219,7 @@ class TraineeServiceTest {
         TrainerShortResponseDTO mappedAvailableTrainer = new TrainerShortResponseDTO();
 
         when(traineeRepository.findByUserEntity_Username("trainee.user")).thenReturn(Optional.of(trainee));
-        when(trainerRepository.findByUserIsActiveTrue()).thenReturn(List.of(assignedTrainer, availableTrainer));
+        when(trainerRepository.findByUserEntity_IsActiveTrue()).thenReturn(List.of(assignedTrainer, availableTrainer));
         when(gymMapper.toTrainerShortResponse(availableTrainer)).thenReturn(mappedAvailableTrainer);
 
         List<TrainerShortResponseDTO> response = traineeService.getNotAssignedActiveTrainers("trainee.user");
@@ -239,7 +239,7 @@ class TraineeServiceTest {
         TrainerShortResponseDTO secondResponse = new TrainerShortResponseDTO();
 
         when(traineeRepository.findByUserEntity_Username("trainee.user")).thenReturn(Optional.of(trainee));
-        when(trainerRepository.findByUserUsernameIn(List.of("first.trainer", "second.trainer")))
+        when(trainerRepository.findByUserEntity_UsernameIn(List.of("first.trainer", "second.trainer")))
                 .thenReturn(List.of(firstTrainer, secondTrainer));
         when(traineeRepository.save(trainee)).thenReturn(trainee);
         when(gymMapper.toTrainerShortResponse(firstTrainer)).thenReturn(firstResponse);
@@ -259,7 +259,7 @@ class TraineeServiceTest {
         UpdateTraineeTrainersRequestDTO request = trainerAssignmentRequest("first.trainer", "missing.trainer");
 
         when(traineeRepository.findByUserEntity_Username("trainee.user")).thenReturn(Optional.of(trainee));
-        when(trainerRepository.findByUserUsernameIn(List.of("first.trainer", "missing.trainer")))
+        when(trainerRepository.findByUserEntity_UsernameIn(List.of("first.trainer", "missing.trainer")))
                 .thenReturn(List.of(firstTrainer));
 
         assertThrows(
@@ -278,7 +278,7 @@ class TraineeServiceTest {
         UpdateTraineeTrainersRequestDTO request = trainerAssignmentRequest("active.trainer", "inactive.trainer");
 
         when(traineeRepository.findByUserEntity_Username("trainee.user")).thenReturn(Optional.of(trainee));
-        when(trainerRepository.findByUserUsernameIn(List.of("active.trainer", "inactive.trainer")))
+        when(trainerRepository.findByUserEntity_UsernameIn(List.of("active.trainer", "inactive.trainer")))
                 .thenReturn(List.of(activeTrainer, inactiveTrainer));
 
         assertThrows(
