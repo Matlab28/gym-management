@@ -22,7 +22,7 @@ public class GymUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        UserEntity user = userRepository.findByUsername(username)
+        UserEntity user = userRepository.findByUsernameIgnoreCaseContains(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
 
         if (!Boolean.TRUE.equals(user.getIsActive())) {

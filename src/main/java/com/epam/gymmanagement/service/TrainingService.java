@@ -4,9 +4,11 @@ import com.epam.gymmanagement.constant.TrainingType;
 import com.epam.gymmanagement.constant.UserRole;
 import com.epam.gymmanagement.dto.request.AddTrainingRequestDTO;
 import com.epam.gymmanagement.dto.request.TraineeTraineesRequestDTO;
+import com.epam.gymmanagement.dto.request.TraineeTrainingsRequestDTO;
 import com.epam.gymmanagement.dto.request.TrainerTrainingsRequestDTO;
 import com.epam.gymmanagement.dto.response.MessageResponseDTO;
 import com.epam.gymmanagement.dto.response.TrainingResponseDTO;
+import com.epam.gymmanagement.dto.response.TrainingTypeResponseDTO;
 import com.epam.gymmanagement.entity.TraineeEntity;
 import com.epam.gymmanagement.entity.TrainerEntity;
 import com.epam.gymmanagement.entity.TrainingEntity;
@@ -20,6 +22,7 @@ import com.epam.gymmanagement.repository.TrainingTypeRepository;
 import com.epam.gymmanagement.security.SecurityService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.modelmapper.ModelMapper;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,6 +40,7 @@ public class TrainingService {
     private final TrainingTypeRepository trainingTypeRepository;
     private final GymMapper gymMapper;
     private final SecurityService securityService;
+    private final ModelMapper modelMapper;
 
     @Transactional
     public MessageResponseDTO addTraining(AddTrainingRequestDTO request) {
@@ -142,6 +146,15 @@ public class TrainingService {
         return trainings.stream()
                 .map(gymMapper::toTrainingResponse)
                 .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public TrainingTypeResponseDTO getTrainingType(String trainingType) {
+        TrainingTypeEntity trainingTypeEntity = trainingTypeRepository.findByTrainingTypeNameContainingIgnoreCase(parseTrainingType(trainingType))
+                .orElseThrow(() -> new NotFoundException("Training type not found"));
+
+        log.info("Fetched training type: \"{}\"", trainingTypeEntity.getTrainingTypeName());
+        return modelMapper.map(trainingTypeEntity, TrainingTypeResponseDTO.class);
     }
 
     private TrainingType parseTrainingType(String trainingType) {

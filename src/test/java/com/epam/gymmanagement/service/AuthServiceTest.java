@@ -50,7 +50,7 @@ class AuthServiceTest {
         LoginRequestDTO request = loginRequest("trainer.user", "secret");
         UserEntity user = ServiceTestFixtures.user("trainer.user", UserRole.TRAINER, true);
 
-        when(userRepository.findByUsername("trainer.user")).thenReturn(Optional.of(user));
+        when(userRepository.findByUsernameIgnoreCaseContains("trainer.user")).thenReturn(Optional.of(user));
         when(passwordEncoder.matches("secret", user.getPassword())).thenReturn(true);
         when(jwtService.generateToken("trainer.user")).thenReturn("jwt-token");
         when(userRoleResolver.resolve(user)).thenReturn(UserRole.TRAINER);
@@ -66,7 +66,7 @@ class AuthServiceTest {
     @Test
     void loginThrowsWhenUserDoesNotExist() {
         LoginRequestDTO request = loginRequest("missing.user", "secret");
-        when(userRepository.findByUsername("missing.user")).thenReturn(Optional.empty());
+        when(userRepository.findByUsernameIgnoreCaseContains("missing.user")).thenReturn(Optional.empty());
 
         assertThrows(BadRequestException.class, () -> authService.login(request));
 
@@ -77,7 +77,7 @@ class AuthServiceTest {
     void loginThrowsWhenProfileIsInactive() {
         LoginRequestDTO request = loginRequest("inactive.user", "secret");
         UserEntity user = ServiceTestFixtures.user("inactive.user", UserRole.TRAINEE, false);
-        when(userRepository.findByUsername("inactive.user")).thenReturn(Optional.of(user));
+        when(userRepository.findByUsernameIgnoreCaseContains("inactive.user")).thenReturn(Optional.of(user));
 
         assertThrows(BadRequestException.class, () -> authService.login(request));
 
@@ -89,7 +89,7 @@ class AuthServiceTest {
         LoginRequestDTO request = loginRequest("trainee.user", "wrong");
         UserEntity user = ServiceTestFixtures.user("trainee.user", UserRole.TRAINEE, true);
 
-        when(userRepository.findByUsername("trainee.user")).thenReturn(Optional.of(user));
+        when(userRepository.findByUsernameIgnoreCaseContains("trainee.user")).thenReturn(Optional.of(user));
         when(passwordEncoder.matches("wrong", user.getPassword())).thenReturn(false);
 
         assertThrows(BadRequestException.class, () -> authService.login(request));
@@ -102,7 +102,7 @@ class AuthServiceTest {
         ChangePasswordRequestDTO request = changePasswordRequest("trainee.user", "old", "newStrong1");
         UserEntity user = ServiceTestFixtures.user("trainee.user", UserRole.TRAINEE, true);
 
-        when(userRepository.findByUsername("trainee.user")).thenReturn(Optional.of(user));
+        when(userRepository.findByUsernameIgnoreCaseContains("trainee.user")).thenReturn(Optional.of(user));
         when(passwordEncoder.matches("old", user.getPassword())).thenReturn(true);
         when(passwordEncoder.encode("newStrong1")).thenReturn("encoded-new");
 
@@ -117,7 +117,7 @@ class AuthServiceTest {
     @Test
     void changePasswordThrowsWhenUserDoesNotExist() {
         ChangePasswordRequestDTO request = changePasswordRequest("missing.user", "old", "newStrong1");
-        when(userRepository.findByUsername("missing.user")).thenReturn(Optional.empty());
+        when(userRepository.findByUsernameIgnoreCaseContains("missing.user")).thenReturn(Optional.empty());
 
         assertThrows(NotFoundException.class, () -> authService.changePassword(request));
 
@@ -130,7 +130,7 @@ class AuthServiceTest {
         ChangePasswordRequestDTO request = changePasswordRequest("trainee.user", "wrong", "newStrong1");
         UserEntity user = ServiceTestFixtures.user("trainee.user", UserRole.TRAINEE, true);
 
-        when(userRepository.findByUsername("trainee.user")).thenReturn(Optional.of(user));
+        when(userRepository.findByUsernameIgnoreCaseContains("trainee.user")).thenReturn(Optional.of(user));
         when(passwordEncoder.matches("wrong", user.getPassword())).thenReturn(false);
 
         assertThrows(BadRequestException.class, () -> authService.changePassword(request));
@@ -144,7 +144,7 @@ class AuthServiceTest {
         UserEntity user = ServiceTestFixtures.user("admin.user", UserRole.ADMIN, true);
 
         when(securityService.currentUsername()).thenReturn("admin.user");
-        when(userRepository.findByUsername("admin.user")).thenReturn(Optional.of(user));
+        when(userRepository.findByUsernameIgnoreCaseContains("admin.user")).thenReturn(Optional.of(user));
         when(userRoleResolver.resolve(user)).thenReturn(UserRole.ADMIN);
 
         SessionResponseDTO response = authService.currentSession();

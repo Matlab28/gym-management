@@ -3,9 +3,11 @@ package com.epam.gymmanagement.controller;
 import com.epam.gymmanagement.constant.TrainingType;
 import com.epam.gymmanagement.dto.request.AddTrainingRequestDTO;
 import com.epam.gymmanagement.dto.request.TraineeTraineesRequestDTO;
+import com.epam.gymmanagement.dto.request.TraineeTrainingsRequestDTO;
 import com.epam.gymmanagement.dto.request.TrainerTrainingsRequestDTO;
 import com.epam.gymmanagement.dto.response.MessageResponseDTO;
 import com.epam.gymmanagement.dto.response.TrainingResponseDTO;
+import com.epam.gymmanagement.dto.response.TrainingTypeResponseDTO;
 import com.epam.gymmanagement.service.TrainingService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -47,28 +49,42 @@ public class TrainingController {
         return ResponseEntity.ok(trainingService.getTraineeTrainings(dto));
     }
 
-    @GetMapping("/trainee/{username}")
-    @Operation(summary = "Get training sessions for a trainee based on various filters")
-    public ResponseEntity<List<TrainingResponseDTO>> getTraineeTrainings(
-            @PathVariable String username,
-            @RequestParam(required = false)
-            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
-            LocalDate periodFrom,
-            @RequestParam(required = false)
-            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
-            LocalDate periodTo,
-            @RequestParam(required = false) String trainerName,
-            @RequestParam(required = false) String trainingType
-    ) {
-        TraineeTraineesRequestDTO dto = new TraineeTraineesRequestDTO();
-        dto.setUsername(username);
-        dto.setPeriodFrom(periodFrom);
-        dto.setPeriodTo(periodTo);
-        dto.setTrainerName(trainerName);
-        dto.setTrainingType(parseTrainingType(trainingType));
 
-        return ResponseEntity.ok(trainingService.getTraineeTrainings(dto));
-    }
+//    @GetMapping("/trainee/filter")
+//    @Operation(summary = "Get training sessions for a trainee based on various filters")
+//    public ResponseEntity<List<TrainingResponseDTO>> getTraineeTrainings(@Valid @RequestBody TraineeTrainingsRequestDTO dto) {
+////        TraineeTraineesRequestDTO dto = new TraineeTraineesRequestDTO();
+////        dto.setUsername(username);
+////        dto.setPeriodFrom(periodFrom);
+////        dto.setPeriodTo(periodTo);
+////        dto.setTrainerName(trainerName);
+////        dto.setTrainingType(parseTrainingType(trainingType));
+//
+//        return ResponseEntity.ok(trainingService.getTraineeTrainings(dto));
+//    }
+
+//    @GetMapping("/trainee/{username}")
+//    @Operation(summary = "Get training sessions for a trainee based on various filters")
+//    public ResponseEntity<List<TrainingResponseDTO>> getTraineeTrainings(
+//            @PathVariable String username,
+//            @RequestParam(required = false)
+//            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+//            LocalDate periodFrom,
+//            @RequestParam(required = false)
+//            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+//            LocalDate periodTo,
+//            @RequestParam(required = false) String trainerName,
+//            @RequestParam(required = false) String trainingType
+//    ) {
+//        TraineeTraineesRequestDTO dto = new TraineeTraineesRequestDTO();
+//        dto.setUsername(username);
+//        dto.setPeriodFrom(periodFrom);
+//        dto.setPeriodTo(periodTo);
+//        dto.setTrainerName(trainerName);
+//        dto.setTrainingType(parseTrainingType(trainingType));
+//
+//        return ResponseEntity.ok(trainingService.getTraineeTrainings(dto));
+//    }
 
     @GetMapping("/trainer/{username}")
     @Operation(summary = "Get training sessions for a trainer based on various filters")
@@ -89,6 +105,12 @@ public class TrainingController {
         dto.setTraineeName(traineeName);
 
         return ResponseEntity.ok(trainingService.getTrainerTrainings(dto));
+    }
+
+    @GetMapping("/types")
+    @Operation(summary = "Get training type information based on the provided training type name")
+    public ResponseEntity<TrainingTypeResponseDTO> getTrainingType(String trainingType) {
+        return ResponseEntity.ok(trainingService.getTrainingType(trainingType));
     }
 
     private TrainingType parseTrainingType(String trainingType) {

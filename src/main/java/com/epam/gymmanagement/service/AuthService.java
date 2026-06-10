@@ -30,7 +30,7 @@ public class AuthService {
     private final UserRoleResolver userRoleResolver;
 
     public LoginResponseDTO login(LoginRequestDTO request) {
-        UserEntity user = userRepository.findByUsername(request.getUsername())
+        UserEntity user = userRepository.findByUsernameIgnoreCaseContains(request.getUsername())
                 .orElseThrow(() -> new BadRequestException("Invalid username or password"));
 
         if (!Boolean.TRUE.equals(user.getIsActive())) {
@@ -56,7 +56,7 @@ public class AuthService {
     public MessageResponseDTO changePassword(ChangePasswordRequestDTO request) {
         securityService.requireSameUserOrAdmin(request.getUsername());
 
-        UserEntity user = userRepository.findByUsername(request.getUsername())
+        UserEntity user = userRepository.findByUsernameIgnoreCaseContains(request.getUsername())
                 .orElseThrow(() -> new NotFoundException("User not found"));
 
         if (!Boolean.TRUE.equals(user.getIsActive())) {
@@ -83,7 +83,7 @@ public class AuthService {
     @Transactional(readOnly = true)
     public SessionResponseDTO currentSession() {
         String username = securityService.currentUsername();
-        UserEntity user = userRepository.findByUsername(username)
+        UserEntity user = userRepository.findByUsernameIgnoreCaseContains(username)
                 .orElseThrow(() -> new NotFoundException("User not found"));
 
         return new SessionResponseDTO(username, userRoleResolver.resolve(user).name());
