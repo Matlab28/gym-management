@@ -281,6 +281,12 @@ button {
     box-shadow: 0 0 0 4px rgba(15, 118, 110, 0.12);
 }
 
+.field input[readonly] {
+    background: #f3f5f6;
+    color: var(--muted);
+    cursor: default;
+}
+
 .field-hint {
     color: var(--muted);
     font-size: 12px;

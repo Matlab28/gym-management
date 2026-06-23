@@ -242,7 +242,7 @@ function confirmTemplate() {
         <form id="confirmForm" class="form-grid" novalidate>
             <div class="field">
                 <label for="confirmEmail">Email</label>
-                <input id="confirmEmail" name="email" type="email" autocomplete="email" value="${escapeHtml(state.email)}" required>
+                <input id="confirmEmail" name="email" type="email" autocomplete="email" value="${escapeHtml(state.email)}" readonly required>
             </div>
             <div class="field">
                 <label for="confirmation">Confirmation code</label>
