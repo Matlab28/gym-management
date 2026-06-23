@@ -1,10 +1,12 @@
 package com.epam.gymmanagement.controller;
 
+import com.epam.gymmanagement.dto.request.ChangePasswordRequestDTO;
+import com.epam.gymmanagement.dto.request.ConfirmRequestDto;
 import com.epam.gymmanagement.dto.request.LoginRequestDTO;
-import com.epam.gymmanagement.dto.request.update.ChangePasswordRequestDTO;
-import com.epam.gymmanagement.dto.response.LoginResponseDTO;
+import com.epam.gymmanagement.dto.request.RegisterRequestDTO;
+import com.epam.gymmanagement.dto.request.ResendConfirmationRequestDTO;
+import com.epam.gymmanagement.dto.response.AuthResponseDTO;
 import com.epam.gymmanagement.dto.response.MessageResponseDTO;
-import com.epam.gymmanagement.dto.response.SessionResponseDTO;
 import com.epam.gymmanagement.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -26,11 +28,17 @@ public class AuthController {
 
     @PostMapping("/login")
     @Operation(summary = "Authenticate a user and return a JWT token")
-    public ResponseEntity<LoginResponseDTO> login(
+    public ResponseEntity<AuthResponseDTO> login(
             @Valid @RequestBody LoginRequestDTO request
     ) {
-        LoginResponseDTO response = authService.login(request);
+        AuthResponseDTO response = authService.login(request);
         return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/register")
+    @Operation(summary = "Register a new user and send an email confirmation code")
+    public ResponseEntity<AuthResponseDTO> register(@Valid @RequestBody RegisterRequestDTO request) {
+        return ResponseEntity.ok(authService.register(request));
     }
 
     @PutMapping("/change-password")
@@ -46,8 +54,22 @@ public class AuthController {
     @GetMapping("/me")
     @SecurityRequirement(name = "Bearer Authentication")
     @Operation(summary = "Get information about the current authenticated user")
-    public ResponseEntity<SessionResponseDTO> currentSession() {
-        SessionResponseDTO response = authService.currentSession();
+    public ResponseEntity<AuthResponseDTO> currentSession() {
+        AuthResponseDTO response = authService.currentSession();
         return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/confirmation")
+    @Operation(summary = "Confirm email with a code and return a JWT token")
+    public ResponseEntity<AuthResponseDTO> confirm(@Valid @RequestBody ConfirmRequestDto dto) {
+        return ResponseEntity.ok(authService.confirm(dto));
+    }
+
+    @PostMapping("/confirmation/resend")
+    @Operation(summary = "Resend an email confirmation code")
+    public ResponseEntity<AuthResponseDTO> resendConfirmationCode(
+            @Valid @RequestBody ResendConfirmationRequestDTO request
+    ) {
+        return ResponseEntity.ok(authService.resendConfirmationCode(request));
     }
 }

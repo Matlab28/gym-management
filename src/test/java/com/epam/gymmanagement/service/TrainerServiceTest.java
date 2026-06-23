@@ -3,10 +3,10 @@ package com.epam.gymmanagement.service;
 import com.epam.gymmanagement.constant.TrainingType;
 import com.epam.gymmanagement.constant.UserRole;
 import com.epam.gymmanagement.dto.request.TrainerRegistrationRequestDTO;
-import com.epam.gymmanagement.dto.request.update.UpdateTrainerProfileRequestDTO;
+import com.epam.gymmanagement.dto.request.UpdateTrainerProfileRequestDTO;
+import com.epam.gymmanagement.dto.response.AuthResponseDTO;
 import com.epam.gymmanagement.dto.response.MessageResponseDTO;
-import com.epam.gymmanagement.dto.response.RegistrationResponseDTO;
-import com.epam.gymmanagement.dto.response.TrainerProfileResponseDTO;
+import com.epam.gymmanagement.dto.response.UserProfileResponseDTO;
 import com.epam.gymmanagement.entity.TrainerEntity;
 import com.epam.gymmanagement.entity.TrainingTypeEntity;
 import com.epam.gymmanagement.entity.UserEntity;
@@ -77,7 +77,7 @@ class TrainerServiceTest {
         when(passwordEncoder.encode("RawPass1")).thenReturn("encoded-pass");
         when(userRepository.save(any(UserEntity.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        RegistrationResponseDTO response = trainerService.registerTrainer(request);
+        AuthResponseDTO response = trainerService.registerTrainer(request);
 
         assertEquals("jane.trainer", response.getUsername());
         assertEquals("RawPass1", response.getPassword());
@@ -122,12 +122,12 @@ class TrainerServiceTest {
     @Test
     void getTrainerProfileRequiresAccessAndMapsProfile() {
         TrainerEntity trainer = ServiceTestFixtures.trainer("trainer.user", true, TrainingType.FITNESS);
-        TrainerProfileResponseDTO mapped = new TrainerProfileResponseDTO();
+        UserProfileResponseDTO mapped = new UserProfileResponseDTO();
 
         when(trainerRepository.findByUserEntity_Username("trainer.user")).thenReturn(Optional.of(trainer));
         when(gymMapper.toTrainerProfileResponse(trainer)).thenReturn(mapped);
 
-        TrainerProfileResponseDTO response = trainerService.getTrainerProfile("trainer.user");
+        UserProfileResponseDTO response = trainerService.getTrainerProfile("trainer.user");
 
         assertEquals(mapped, response);
         verify(securityService).requireSelfOrAdmin("trainer.user", UserRole.TRAINER);
@@ -137,13 +137,13 @@ class TrainerServiceTest {
     void updateTrainerProfilePersistsUserChangesAndReturnsMappedProfile() {
         TrainerEntity trainer = ServiceTestFixtures.trainer("trainer.user", true, TrainingType.FITNESS);
         UpdateTrainerProfileRequestDTO request = updateRequest("Updated", "Trainer", false);
-        TrainerProfileResponseDTO mapped = new TrainerProfileResponseDTO();
+        UserProfileResponseDTO mapped = new UserProfileResponseDTO();
 
         when(trainerRepository.findByUserEntity_Username("trainer.user")).thenReturn(Optional.of(trainer));
         when(trainerRepository.save(trainer)).thenReturn(trainer);
         when(gymMapper.toTrainerProfileResponse(trainer)).thenReturn(mapped);
 
-        TrainerProfileResponseDTO response = trainerService.updateTrainerProfile("trainer.user", request);
+        UserProfileResponseDTO response = trainerService.updateTrainerProfile("trainer.user", request);
 
         assertEquals(mapped, response);
         assertEquals("Updated", trainer.getUserEntity().getFirstName());

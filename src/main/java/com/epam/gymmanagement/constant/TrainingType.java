@@ -9,7 +9,7 @@ public enum TrainingType {
     ZUMBA("Zumba"),
     STRETCHING("Stretching"),
     RESISTANCE("Resistance"),
-    ;
+    SET_LATER("Set Later");
 
     private final String value;
 

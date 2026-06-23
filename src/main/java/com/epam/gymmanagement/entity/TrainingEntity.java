@@ -9,12 +9,12 @@ import java.time.LocalDate;
 import java.util.UUID;
 
 @Entity
-@Table(name = "trainings")
 @Getter
 @Setter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
+@Table(name = "trainings")
 public class TrainingEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

@@ -12,11 +12,17 @@ import java.util.UUID;
 public interface UserRepository extends JpaRepository<UserEntity, UUID> {
     Optional<UserEntity> findByUsernameIgnoreCaseContains(String username);
 
+    Optional<UserEntity> findByEmailIgnoreCase(String email);
+
+    boolean existsByEmailIgnoreCase(String email);
+
     boolean existsByUsername(String username);
 
     boolean existsByRole(UserRole role);
 
+    long countByIsActive(boolean isActive);
+
     long countByRole(UserRole role);
 
-    long countByIsActive(Boolean active);
+    UUID id(UUID id);
 }

@@ -19,5 +19,5 @@ public class AdminDashboardResponseDTO {
     private long trainees;
     private long trainers;
     private long trainings;
-    private List<AdminUserSummaryResponseDTO> users;
+    private List<UserSummaryResponseDTO> users;
 }

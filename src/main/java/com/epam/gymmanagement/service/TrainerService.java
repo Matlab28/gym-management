@@ -3,11 +3,11 @@ package com.epam.gymmanagement.service;
 import com.epam.gymmanagement.constant.TrainingType;
 import com.epam.gymmanagement.constant.UserRole;
 import com.epam.gymmanagement.dto.request.TrainerRegistrationRequestDTO;
-import com.epam.gymmanagement.dto.request.update.UpdateTrainerProfileRequestDTO;
+import com.epam.gymmanagement.dto.request.UpdateTrainerProfileRequestDTO;
+import com.epam.gymmanagement.dto.response.AuthResponseDTO;
 import com.epam.gymmanagement.dto.response.MessageResponseDTO;
-import com.epam.gymmanagement.dto.response.RegistrationResponseDTO;
-import com.epam.gymmanagement.dto.response.TrainerProfileResponseDTO;
 import com.epam.gymmanagement.dto.response.TrainingTypeResponseDTO;
+import com.epam.gymmanagement.dto.response.UserProfileResponseDTO;
 import com.epam.gymmanagement.entity.TrainerEntity;
 import com.epam.gymmanagement.entity.TrainingTypeEntity;
 import com.epam.gymmanagement.entity.UserEntity;
@@ -43,7 +43,7 @@ public class TrainerService {
     private final SecurityService securityService;
 
     @Transactional
-    public RegistrationResponseDTO registerTrainer(TrainerRegistrationRequestDTO request) {
+    public AuthResponseDTO registerTrainer(TrainerRegistrationRequestDTO request) {
         TrainingType trainingType = parseTrainingType(request.getSpecialization());
         TrainingTypeEntity specialization = trainingTypeRepository
                 .findByTrainingTypeName(trainingType)
@@ -70,7 +70,7 @@ public class TrainerService {
 
         trainerRepository.save(trainer);
         log.info("Registered trainer profile for username={}", username);
-        return new RegistrationResponseDTO(username, rawPassword);
+        return AuthResponseDTO.registration(username, rawPassword);
     }
 
     @Transactional(readOnly = true)
@@ -88,7 +88,7 @@ public class TrainerService {
     }
 
     @Transactional(readOnly = true)
-    public TrainerProfileResponseDTO getTrainerProfile(String username) {
+    public UserProfileResponseDTO getTrainerProfile(String username) {
         securityService.requireSelfOrAdmin(username, UserRole.TRAINER);
 
         TrainerEntity trainer = trainerRepository.findByUserEntity_Username(username)
@@ -98,7 +98,7 @@ public class TrainerService {
     }
 
     @Transactional
-    public TrainerProfileResponseDTO updateTrainerProfile(String username, UpdateTrainerProfileRequestDTO request) {
+    public UserProfileResponseDTO updateTrainerProfile(String username, UpdateTrainerProfileRequestDTO request) {
         securityService.requireSelfOrAdmin(username, UserRole.TRAINER);
 
         TrainerEntity trainer = trainerRepository.findByUserEntity_Username(username)

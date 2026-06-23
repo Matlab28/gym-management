@@ -1,11 +1,12 @@
 package com.epam.gymmanagement.controller;
 
 import com.epam.gymmanagement.dto.request.TrainerRegistrationRequestDTO;
-import com.epam.gymmanagement.dto.request.update.UpdateTrainerProfileRequestDTO;
+import com.epam.gymmanagement.dto.request.UpdateTrainerProfileRequestDTO;
+import com.epam.gymmanagement.dto.response.AuthResponseDTO;
 import com.epam.gymmanagement.dto.response.MessageResponseDTO;
-import com.epam.gymmanagement.dto.response.RegistrationResponseDTO;
-import com.epam.gymmanagement.dto.response.TrainerProfileResponseDTO;
 import com.epam.gymmanagement.dto.response.TrainingTypeResponseDTO;
+import com.epam.gymmanagement.dto.response.UserProfileResponseDTO;
+import com.epam.gymmanagement.service.TraineeService;
 import com.epam.gymmanagement.service.TrainerService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -30,19 +31,19 @@ public class TrainerController {
 
     @PostMapping("/register")
     @Operation(summary = "Register a new trainer")
-    public ResponseEntity<RegistrationResponseDTO> registerTrainer(
+    public ResponseEntity<AuthResponseDTO> registerTrainer(
             @Valid @RequestBody TrainerRegistrationRequestDTO request
     ) {
-        RegistrationResponseDTO response = trainerService.registerTrainer(request);
+        AuthResponseDTO response = trainerService.registerTrainer(request);
         return ResponseEntity.ok(response);
     }
 
     @GetMapping("profile/{username}")
     @Operation(summary = "Get a trainer profile by username")
-    public ResponseEntity<TrainerProfileResponseDTO> getTrainerProfile(
+    public ResponseEntity<UserProfileResponseDTO> getTrainerProfile(
             @PathVariable String username
     ) {
-        TrainerProfileResponseDTO response = trainerService.getTrainerProfile(username);
+        UserProfileResponseDTO response = trainerService.getTrainerProfile(username);
         return ResponseEntity.ok(response);
     }
 
@@ -54,11 +55,11 @@ public class TrainerController {
 
     @PutMapping("update/{username}")
     @Operation(summary = "Update a trainer profile by username")
-    public ResponseEntity<TrainerProfileResponseDTO> updateTrainerProfile(
+    public ResponseEntity<UserProfileResponseDTO> updateTrainerProfile(
             @PathVariable String username,
             @Valid @RequestBody UpdateTrainerProfileRequestDTO request
     ) {
-        TrainerProfileResponseDTO response = trainerService.updateTrainerProfile(username, request);
+        UserProfileResponseDTO response = trainerService.updateTrainerProfile(username, request);
         return ResponseEntity.ok(response);
     }
 

@@ -1,9 +1,12 @@
 package com.epam.gymmanagement.controller;
 
 import com.epam.gymmanagement.dto.request.TraineeRegistrationRequestDTO;
-import com.epam.gymmanagement.dto.request.update.UpdateTraineeProfileRequestDTO;
-import com.epam.gymmanagement.dto.request.update.UpdateTraineeTrainersRequestDTO;
-import com.epam.gymmanagement.dto.response.*;
+import com.epam.gymmanagement.dto.request.UpdateTraineeProfileRequestDTO;
+import com.epam.gymmanagement.dto.request.UpdateTraineeTrainersRequestDTO;
+import com.epam.gymmanagement.dto.response.AuthResponseDTO;
+import com.epam.gymmanagement.dto.response.MessageResponseDTO;
+import com.epam.gymmanagement.dto.response.UserProfileResponseDTO;
+import com.epam.gymmanagement.dto.response.UserSummaryResponseDTO;
 import com.epam.gymmanagement.service.TraineeService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -29,29 +32,29 @@ public class TraineeController {
 
     @PostMapping("/register")
     @Operation(summary = "Register a new trainee")
-    public ResponseEntity<RegistrationResponseDTO> registerTrainee(
+    public ResponseEntity<AuthResponseDTO> registerTrainee(
             @Valid @RequestBody TraineeRegistrationRequestDTO request
     ) {
-        RegistrationResponseDTO response = traineeService.registerTrainee(request);
+        AuthResponseDTO response = traineeService.registerTrainee(request);
         return ResponseEntity.ok(response);
     }
 
     @GetMapping("profile/{username}")
     @Operation(summary = "Get a trainee profile by username")
-    public ResponseEntity<TraineeProfileResponseDTO> getTraineeProfile(
+    public ResponseEntity<UserProfileResponseDTO> getTraineeProfile(
             @PathVariable String username
     ) {
-        TraineeProfileResponseDTO response = traineeService.getTraineeProfile(username);
+        UserProfileResponseDTO response = traineeService.getTraineeProfile(username);
         return ResponseEntity.ok(response);
     }
 
     @PutMapping("update/{username}")
     @Operation(summary = "Update a trainee profile by username")
-    public ResponseEntity<TraineeProfileResponseDTO> updateTraineeProfile(
+    public ResponseEntity<UserProfileResponseDTO> updateTraineeProfile(
             @PathVariable String username,
             @Valid @RequestBody UpdateTraineeProfileRequestDTO request
     ) {
-        TraineeProfileResponseDTO response = traineeService.updateTraineeProfile(username, request);
+        UserProfileResponseDTO response = traineeService.updateTraineeProfile(username, request);
         return ResponseEntity.ok(response);
     }
 
@@ -84,10 +87,10 @@ public class TraineeController {
 
     @GetMapping("/{username}/not-assigned-trainers")
     @Operation(summary = "Get a list of active trainers not assigned to the trainee")
-    public ResponseEntity<List<TrainerShortResponseDTO>> getNotAssignedActiveTrainers(
+    public ResponseEntity<List<UserSummaryResponseDTO>> getNotAssignedActiveTrainers(
             @PathVariable String username
     ) {
-        List<TrainerShortResponseDTO> response =
+        List<UserSummaryResponseDTO> response =
                 traineeService.getNotAssignedActiveTrainers(username);
 
         return ResponseEntity.ok(response);
@@ -95,11 +98,11 @@ public class TraineeController {
 
     @PutMapping("update/{username}/trainers")
     @Operation(summary = "Update the list of trainers assigned to a trainee")
-    public ResponseEntity<TrainerAssignmentResponseDTO> updateTraineeTrainers(
+    public ResponseEntity<List<UserSummaryResponseDTO>> updateTraineeTrainers(
             @PathVariable String username,
             @Valid @RequestBody UpdateTraineeTrainersRequestDTO request
     ) {
-        TrainerAssignmentResponseDTO response =
+        List<UserSummaryResponseDTO> response =
                 traineeService.updateTraineeTrainers(username, request);
 
         return ResponseEntity.ok(response);

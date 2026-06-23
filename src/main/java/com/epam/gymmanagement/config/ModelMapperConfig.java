@@ -1,10 +1,9 @@
 package com.epam.gymmanagement.config;
 
-import com.epam.gymmanagement.dto.response.TraineeProfileResponseDTO;
-import com.epam.gymmanagement.dto.response.TraineeShortResponseDTO;
-import com.epam.gymmanagement.dto.response.TrainerProfileResponseDTO;
-import com.epam.gymmanagement.dto.response.TrainerShortResponseDTO;
+import com.epam.gymmanagement.constant.UserRole;
 import com.epam.gymmanagement.dto.response.TrainingResponseDTO;
+import com.epam.gymmanagement.dto.response.UserProfileResponseDTO;
+import com.epam.gymmanagement.dto.response.UserSummaryResponseDTO;
 import com.epam.gymmanagement.entity.TraineeEntity;
 import com.epam.gymmanagement.entity.TrainerEntity;
 import com.epam.gymmanagement.entity.TrainingEntity;
@@ -37,46 +36,58 @@ public class ModelMapperConfig {
             return trainingType == null ? null : trainingType.getTrainingTypeName().getValue();
         };
 
-        modelMapper.createTypeMap(TrainerEntity.class, TrainerShortResponseDTO.class)
+        modelMapper.createTypeMap(TrainerEntity.class, UserSummaryResponseDTO.class)
                 .addMappings(mapper -> {
-                    mapper.map(TrainerEntity::getId, TrainerShortResponseDTO::setTrainerId);
-                    mapper.map(source -> source.getUserEntity().getUsername(), TrainerShortResponseDTO::setTrainerUsername);
-                    mapper.map(source -> source.getUserEntity().getFirstName(), TrainerShortResponseDTO::setTrainerFirstName);
-                    mapper.map(source -> source.getUserEntity().getLastName(), TrainerShortResponseDTO::setTrainerLastName);
+                    mapper.map(TrainerEntity::getId, UserSummaryResponseDTO::setId);
+                    mapper.map(source -> source.getUserEntity().getUsername(), UserSummaryResponseDTO::setUsername);
+                    mapper.map(source -> source.getUserEntity().getFirstName(), UserSummaryResponseDTO::setFirstName);
+                    mapper.map(source -> source.getUserEntity().getLastName(), UserSummaryResponseDTO::setLastName);
+//                    mapper.map(source -> source.getUserEntity().getIsActive(), UserSummaryResponseDTO::setActive);
                     mapper.using(trainingTypeName)
-                            .map(TrainerEntity::getSpecialization, TrainerShortResponseDTO::setTrainerSpecialization);
+                            .map(TrainerEntity::getSpecialization, UserSummaryResponseDTO::setSpecialization);
+                })
+                .setPostConverter(context -> {
+                    context.getDestination().setRole(UserRole.TRAINER);
+                    return context.getDestination();
                 });
 
-        modelMapper.createTypeMap(TrainerEntity.class, TrainerProfileResponseDTO.class)
+        modelMapper.createTypeMap(TrainerEntity.class, UserProfileResponseDTO.class)
                 .addMappings(mapper -> {
-                    mapper.map(TrainerEntity::getId, TrainerProfileResponseDTO::setTrainerId);
-                    mapper.map(source -> source.getUserEntity().getUsername(), TrainerProfileResponseDTO::setUsername);
-                    mapper.map(source -> source.getUserEntity().getFirstName(), TrainerProfileResponseDTO::setFirstName);
-                    mapper.map(source -> source.getUserEntity().getLastName(), TrainerProfileResponseDTO::setLastName);
-                    mapper.map(source -> source.getUserEntity().getIsActive(), TrainerProfileResponseDTO::setIsActive);
+                    mapper.map(TrainerEntity::getId, UserProfileResponseDTO::setId);
+                    mapper.map(source -> source.getUserEntity().getUsername(), UserProfileResponseDTO::setUsername);
+                    mapper.map(source -> source.getUserEntity().getFirstName(), UserProfileResponseDTO::setFirstName);
+                    mapper.map(source -> source.getUserEntity().getLastName(), UserProfileResponseDTO::setLastName);
+//                    mapper.map(source -> source.getUserEntity().getIsActive(), UserProfileResponseDTO::setIsActive);
                     mapper.using(trainingTypeName)
-                            .map(TrainerEntity::getSpecialization, TrainerProfileResponseDTO::setSpecialization);
-                    mapper.skip(TrainerProfileResponseDTO::setTrainees);
+                            .map(TrainerEntity::getSpecialization, UserProfileResponseDTO::setSpecialization);
+                    mapper.skip(UserProfileResponseDTO::setTrainees);
+                    mapper.skip(UserProfileResponseDTO::setTrainers);
                 });
     }
 
     private void configureTraineeMappings(ModelMapper modelMapper) {
-        modelMapper.createTypeMap(TraineeEntity.class, TraineeShortResponseDTO.class)
+        modelMapper.createTypeMap(TraineeEntity.class, UserSummaryResponseDTO.class)
                 .addMappings(mapper -> {
-                    mapper.map(TraineeEntity::getId, TraineeShortResponseDTO::setTraineeId);
-                    mapper.map(source -> source.getUserEntity().getUsername(), TraineeShortResponseDTO::setTraineeUsername);
-                    mapper.map(source -> source.getUserEntity().getFirstName(), TraineeShortResponseDTO::setTraineeFirstName);
-                    mapper.map(source -> source.getUserEntity().getLastName(), TraineeShortResponseDTO::setTraineeLastName);
+                    mapper.map(TraineeEntity::getId, UserSummaryResponseDTO::setId);
+                    mapper.map(source -> source.getUserEntity().getUsername(), UserSummaryResponseDTO::setUsername);
+                    mapper.map(source -> source.getUserEntity().getFirstName(), UserSummaryResponseDTO::setFirstName);
+                    mapper.map(source -> source.getUserEntity().getLastName(), UserSummaryResponseDTO::setLastName);
+//                    mapper.map(source -> source.getUserEntity().getIsActive(), UserSummaryResponseDTO::setActive);
+                })
+                .setPostConverter(context -> {
+                    context.getDestination().setRole(UserRole.TRAINEE);
+                    return context.getDestination();
                 });
 
-        modelMapper.createTypeMap(TraineeEntity.class, TraineeProfileResponseDTO.class)
+        modelMapper.createTypeMap(TraineeEntity.class, UserProfileResponseDTO.class)
                 .addMappings(mapper -> {
-                    mapper.map(TraineeEntity::getId, TraineeProfileResponseDTO::setTraineeId);
-                    mapper.map(source -> source.getUserEntity().getUsername(), TraineeProfileResponseDTO::setUsername);
-                    mapper.map(source -> source.getUserEntity().getFirstName(), TraineeProfileResponseDTO::setFirstName);
-                    mapper.map(source -> source.getUserEntity().getLastName(), TraineeProfileResponseDTO::setLastName);
-                    mapper.map(source -> source.getUserEntity().getIsActive(), TraineeProfileResponseDTO::setIsActive);
-                    mapper.skip(TraineeProfileResponseDTO::setTrainers);
+                    mapper.map(TraineeEntity::getId, UserProfileResponseDTO::setId);
+                    mapper.map(source -> source.getUserEntity().getUsername(), UserProfileResponseDTO::setUsername);
+                    mapper.map(source -> source.getUserEntity().getFirstName(), UserProfileResponseDTO::setFirstName);
+                    mapper.map(source -> source.getUserEntity().getLastName(), UserProfileResponseDTO::setLastName);
+//                    mapper.map(source -> source.getUserEntity().getIsActive(), UserProfileResponseDTO::setIsActive);
+                    mapper.skip(UserProfileResponseDTO::setTrainers);
+                    mapper.skip(UserProfileResponseDTO::setTrainees);
                 });
     }
 

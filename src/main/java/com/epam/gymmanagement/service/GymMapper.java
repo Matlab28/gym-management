@@ -1,6 +1,8 @@
 package com.epam.gymmanagement.service;
 
-import com.epam.gymmanagement.dto.response.*;
+import com.epam.gymmanagement.dto.response.TrainingResponseDTO;
+import com.epam.gymmanagement.dto.response.UserProfileResponseDTO;
+import com.epam.gymmanagement.dto.response.UserSummaryResponseDTO;
 import com.epam.gymmanagement.entity.TraineeEntity;
 import com.epam.gymmanagement.entity.TrainerEntity;
 import com.epam.gymmanagement.entity.TrainingEntity;
@@ -15,32 +17,32 @@ import java.util.List;
 public class GymMapper {
     private final ModelMapper modelMapper;
 
-    public TrainerShortResponseDTO toTrainerShortResponse(TrainerEntity trainer) {
-        return modelMapper.map(trainer, TrainerShortResponseDTO.class);
+    public UserSummaryResponseDTO toTrainerSummaryResponse(TrainerEntity trainer) {
+        return modelMapper.map(trainer, UserSummaryResponseDTO.class);
     }
 
-    public TraineeShortResponseDTO toTraineeShortResponse(TraineeEntity trainee) {
-        return modelMapper.map(trainee, TraineeShortResponseDTO.class);
+    public UserSummaryResponseDTO toTraineeSummaryResponse(TraineeEntity trainee) {
+        return modelMapper.map(trainee, UserSummaryResponseDTO.class);
     }
 
-    public TraineeProfileResponseDTO toTraineeProfileResponse(TraineeEntity trainee) {
-        List<TrainerShortResponseDTO> trainers = trainee.getTrainers()
+    public UserProfileResponseDTO toTraineeProfileResponse(TraineeEntity trainee) {
+        List<UserSummaryResponseDTO> trainers = trainee.getTrainers()
                 .stream()
-                .map(this::toTrainerShortResponse)
+                .map(this::toTrainerSummaryResponse)
                 .toList();
 
-        TraineeProfileResponseDTO response = modelMapper.map(trainee, TraineeProfileResponseDTO.class);
+        UserProfileResponseDTO response = modelMapper.map(trainee, UserProfileResponseDTO.class);
         response.setTrainers(trainers);
         return response;
     }
 
-    public TrainerProfileResponseDTO toTrainerProfileResponse(TrainerEntity trainer) {
-        List<TraineeShortResponseDTO> trainees = trainer.getTrainees()
+    public UserProfileResponseDTO toTrainerProfileResponse(TrainerEntity trainer) {
+        List<UserSummaryResponseDTO> trainees = trainer.getTrainees()
                 .stream()
-                .map(this::toTraineeShortResponse)
+                .map(this::toTraineeSummaryResponse)
                 .toList();
 
-        TrainerProfileResponseDTO response = modelMapper.map(trainer, TrainerProfileResponseDTO.class);
+        UserProfileResponseDTO response = modelMapper.map(trainer, UserProfileResponseDTO.class);
         response.setTrainees(trainees);
         return response;
     }

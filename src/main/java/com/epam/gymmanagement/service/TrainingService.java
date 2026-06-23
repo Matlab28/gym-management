@@ -1,11 +1,10 @@
 package com.epam.gymmanagement.service;
 
+import com.epam.gymmanagement.constant.ProfileStatus;
 import com.epam.gymmanagement.constant.TrainingType;
 import com.epam.gymmanagement.constant.UserRole;
 import com.epam.gymmanagement.dto.request.AddTrainingRequestDTO;
-import com.epam.gymmanagement.dto.request.TraineeTraineesRequestDTO;
-import com.epam.gymmanagement.dto.request.TraineeTrainingsRequestDTO;
-import com.epam.gymmanagement.dto.request.TrainerTrainingsRequestDTO;
+import com.epam.gymmanagement.dto.request.TrainingSearchRequestDTO;
 import com.epam.gymmanagement.dto.response.MessageResponseDTO;
 import com.epam.gymmanagement.dto.response.TrainingResponseDTO;
 import com.epam.gymmanagement.dto.response.TrainingTypeResponseDTO;
@@ -76,12 +75,10 @@ public class TrainingService {
             throw new BadRequestException("Trainer is not assigned to this trainee");
         }
 
-        if (!Boolean.TRUE.equals(trainee.getUserEntity().getIsActive())) {
+        if (trainee.getUserEntity().getProfileStatus() == ProfileStatus.INACTIVE) {
             throw new BadRequestException("Trainee profile is inactive");
-        }
-
-        if (!Boolean.TRUE.equals(trainer.getUserEntity().getIsActive())) {
-            throw new BadRequestException("Trainer profile is inactive");
+        } else if (trainee.getUserEntity().getProfileStatus() == ProfileStatus.SUSPENDED) {
+            throw new BadRequestException("Trainee profile is suspended");
         }
 
         TrainingEntity training = TrainingEntity
@@ -105,7 +102,7 @@ public class TrainingService {
     }
 
     @Transactional(readOnly = true)
-    public List<TrainingResponseDTO> getTraineeTrainings(TraineeTraineesRequestDTO dto) {
+    public List<TrainingResponseDTO> getTraineeTrainings(TrainingSearchRequestDTO dto) {
         securityService.requireSelfOrAdmin(dto.getUsername(), UserRole.TRAINEE);
         validatePeriod(dto.getPeriodFrom(), dto.getPeriodTo());
 
@@ -128,7 +125,7 @@ public class TrainingService {
     }
 
     @Transactional(readOnly = true)
-    public List<TrainingResponseDTO> getTrainerTrainings(TrainerTrainingsRequestDTO dto) {
+    public List<TrainingResponseDTO> getTrainerTrainings(TrainingSearchRequestDTO dto) {
         securityService.requireSelfOrAdmin(dto.getUsername(), UserRole.TRAINER);
         validatePeriod(dto.getPeriodFrom(), dto.getPeriodTo());
 

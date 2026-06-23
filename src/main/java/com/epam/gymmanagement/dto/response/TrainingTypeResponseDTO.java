@@ -1,21 +1,17 @@
 package com.epam.gymmanagement.dto.response;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.UUID;
 
-@Setter
 @Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class TrainingTypeResponseDTO {
     private UUID id;
     private String trainingType;
-
-    public TrainingTypeResponseDTO(UUID id, String trainingType) {
-        this.id = id;
-        this.trainingType = trainingType;
-    }
-
-    public TrainingTypeResponseDTO() {
-    }
 }

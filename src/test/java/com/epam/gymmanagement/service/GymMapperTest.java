@@ -1,11 +1,9 @@
 package com.epam.gymmanagement.service;
 
 import com.epam.gymmanagement.constant.TrainingType;
-import com.epam.gymmanagement.dto.response.TraineeProfileResponseDTO;
-import com.epam.gymmanagement.dto.response.TraineeShortResponseDTO;
-import com.epam.gymmanagement.dto.response.TrainerProfileResponseDTO;
-import com.epam.gymmanagement.dto.response.TrainerShortResponseDTO;
 import com.epam.gymmanagement.dto.response.TrainingResponseDTO;
+import com.epam.gymmanagement.dto.response.UserProfileResponseDTO;
+import com.epam.gymmanagement.dto.response.UserSummaryResponseDTO;
 import com.epam.gymmanagement.entity.TraineeEntity;
 import com.epam.gymmanagement.entity.TrainerEntity;
 import com.epam.gymmanagement.entity.TrainingEntity;
@@ -34,13 +32,13 @@ class GymMapperTest {
     void toTraineeProfileResponseMapsAssignedTrainersOntoMappedProfile() {
         TrainerEntity trainer = ServiceTestFixtures.trainer("trainer.user", true, TrainingType.YOGA);
         TraineeEntity trainee = ServiceTestFixtures.trainee("trainee.user", true, trainer);
-        TrainerShortResponseDTO mappedTrainer = new TrainerShortResponseDTO();
-        TraineeProfileResponseDTO mappedProfile = new TraineeProfileResponseDTO();
+        UserSummaryResponseDTO mappedTrainer = new UserSummaryResponseDTO();
+        UserProfileResponseDTO mappedProfile = new UserProfileResponseDTO();
 
-        when(modelMapper.map(trainer, TrainerShortResponseDTO.class)).thenReturn(mappedTrainer);
-        when(modelMapper.map(trainee, TraineeProfileResponseDTO.class)).thenReturn(mappedProfile);
+        when(modelMapper.map(trainer, UserSummaryResponseDTO.class)).thenReturn(mappedTrainer);
+        when(modelMapper.map(trainee, UserProfileResponseDTO.class)).thenReturn(mappedProfile);
 
-        TraineeProfileResponseDTO response = gymMapper.toTraineeProfileResponse(trainee);
+        UserProfileResponseDTO response = gymMapper.toTraineeProfileResponse(trainee);
 
         assertSame(mappedProfile, response);
         assertEquals(List.of(mappedTrainer), response.getTrainers());
@@ -51,13 +49,13 @@ class GymMapperTest {
         TraineeEntity trainee = ServiceTestFixtures.trainee("trainee.user", true);
         TrainerEntity trainer = ServiceTestFixtures.trainer("trainer.user", true, TrainingType.FITNESS);
         trainer.setTrainees(List.of(trainee));
-        TraineeShortResponseDTO mappedTrainee = new TraineeShortResponseDTO();
-        TrainerProfileResponseDTO mappedProfile = new TrainerProfileResponseDTO();
+        UserSummaryResponseDTO mappedTrainee = new UserSummaryResponseDTO();
+        UserProfileResponseDTO mappedProfile = new UserProfileResponseDTO();
 
-        when(modelMapper.map(trainee, TraineeShortResponseDTO.class)).thenReturn(mappedTrainee);
-        when(modelMapper.map(trainer, TrainerProfileResponseDTO.class)).thenReturn(mappedProfile);
+        when(modelMapper.map(trainee, UserSummaryResponseDTO.class)).thenReturn(mappedTrainee);
+        when(modelMapper.map(trainer, UserProfileResponseDTO.class)).thenReturn(mappedProfile);
 
-        TrainerProfileResponseDTO response = gymMapper.toTrainerProfileResponse(trainer);
+        UserProfileResponseDTO response = gymMapper.toTrainerProfileResponse(trainer);
 
         assertSame(mappedProfile, response);
         assertEquals(List.of(mappedTrainee), response.getTrainees());

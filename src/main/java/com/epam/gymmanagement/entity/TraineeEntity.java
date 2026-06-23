@@ -20,6 +20,7 @@ public class TraineeEntity {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
+    @Column(name = "date_of_birth", nullable = false)
     private LocalDate dateOfBirth;
     private String address;
 
@@ -40,7 +41,6 @@ public class TraineeEntity {
             mappedBy = "trainee",
             cascade = CascadeType.REMOVE,
             orphanRemoval = true
-
     )
     @Builder.Default
     private List<TrainingEntity> trainings = new ArrayList<>();

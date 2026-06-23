@@ -3,8 +3,7 @@ package com.epam.gymmanagement.service;
 import com.epam.gymmanagement.constant.TrainingType;
 import com.epam.gymmanagement.constant.UserRole;
 import com.epam.gymmanagement.dto.request.AddTrainingRequestDTO;
-import com.epam.gymmanagement.dto.request.TraineeTraineesRequestDTO;
-import com.epam.gymmanagement.dto.request.TrainerTrainingsRequestDTO;
+import com.epam.gymmanagement.dto.request.TrainingSearchRequestDTO;
 import com.epam.gymmanagement.dto.response.MessageResponseDTO;
 import com.epam.gymmanagement.dto.response.TrainingResponseDTO;
 import com.epam.gymmanagement.entity.TraineeEntity;
@@ -149,7 +148,7 @@ class TrainingServiceTest {
     void getTraineeTrainingsValidatesAccessNormalizesTypeAndMapsResults() {
         LocalDate from = LocalDate.of(2026, 1, 1);
         LocalDate to = LocalDate.of(2026, 1, 31);
-        TraineeTraineesRequestDTO request = traineeTrainingsRequest(from, to, TrainingType.YOGA);
+        TrainingSearchRequestDTO request = traineeTrainingsRequest(from, to, TrainingType.YOGA);
         TrainingEntity training = ServiceTestFixtures.training(
                 "Yoga Basics",
                 ServiceTestFixtures.trainee("trainee.user", true),
@@ -178,7 +177,7 @@ class TrainingServiceTest {
     void getTraineeTrainingsAllowsMissingTrainingTypeCriteria() {
         LocalDate from = LocalDate.of(2026, 1, 1);
         LocalDate to = LocalDate.of(2026, 1, 31);
-        TraineeTraineesRequestDTO request = traineeTrainingsRequest(from, to, null);
+        TrainingSearchRequestDTO request = traineeTrainingsRequest(from, to, null);
 
         when(traineeRepository.existsByUserEntity_Username("trainee.user")).thenReturn(true);
         when(trainingRepository.findTraineeTrainings(
@@ -196,7 +195,7 @@ class TrainingServiceTest {
 
     @Test
     void getTraineeTrainingsRejectsInvalidPeriod() {
-        TraineeTraineesRequestDTO request = traineeTrainingsRequest(
+        TrainingSearchRequestDTO request = traineeTrainingsRequest(
                 LocalDate.of(2026, 2, 1),
                 LocalDate.of(2026, 1, 1),
                 TrainingType.YOGA
@@ -210,7 +209,7 @@ class TrainingServiceTest {
 
     @Test
     void getTraineeTrainingsThrowsWhenTraineeDoesNotExist() {
-        TraineeTraineesRequestDTO request = traineeTrainingsRequest(
+        TrainingSearchRequestDTO request = traineeTrainingsRequest(
                 LocalDate.of(2026, 1, 1),
                 LocalDate.of(2026, 1, 31),
                 TrainingType.YOGA
@@ -226,7 +225,7 @@ class TrainingServiceTest {
     void getTrainerTrainingsValidatesAccessAndMapsResults() {
         LocalDate from = LocalDate.of(2026, 1, 1);
         LocalDate to = LocalDate.of(2026, 1, 31);
-        TrainerTrainingsRequestDTO request = trainerTrainingsRequest(from, to);
+        TrainingSearchRequestDTO request = trainerTrainingsRequest(from, to);
         TrainingEntity training = ServiceTestFixtures.training(
                 "Yoga Basics",
                 ServiceTestFixtures.trainee("trainee.user", true),
@@ -248,7 +247,7 @@ class TrainingServiceTest {
 
     @Test
     void getTrainerTrainingsRejectsInvalidPeriod() {
-        TrainerTrainingsRequestDTO request = trainerTrainingsRequest(
+        TrainingSearchRequestDTO request = trainerTrainingsRequest(
                 LocalDate.of(2026, 2, 1),
                 LocalDate.of(2026, 1, 1)
         );
@@ -261,7 +260,7 @@ class TrainingServiceTest {
 
     @Test
     void getTrainerTrainingsThrowsWhenTrainerDoesNotExist() {
-        TrainerTrainingsRequestDTO request = trainerTrainingsRequest(
+        TrainingSearchRequestDTO request = trainerTrainingsRequest(
                 LocalDate.of(2026, 1, 1),
                 LocalDate.of(2026, 1, 31)
         );
@@ -283,12 +282,12 @@ class TrainingServiceTest {
                 .build();
     }
 
-    private TraineeTraineesRequestDTO traineeTrainingsRequest(
+    private TrainingSearchRequestDTO traineeTrainingsRequest(
             LocalDate periodFrom,
             LocalDate periodTo,
             TrainingType trainingType
     ) {
-        return TraineeTraineesRequestDTO.builder()
+        return TrainingSearchRequestDTO.builder()
                 .username("trainee.user")
                 .periodFrom(periodFrom)
                 .periodTo(periodTo)
@@ -297,12 +296,12 @@ class TrainingServiceTest {
                 .build();
     }
 
-    private TrainerTrainingsRequestDTO trainerTrainingsRequest(LocalDate periodFrom, LocalDate periodTo) {
-        TrainerTrainingsRequestDTO request = new TrainerTrainingsRequestDTO();
-        request.setUsername("trainer.user");
-        request.setPeriodFrom(periodFrom);
-        request.setPeriodTo(periodTo);
-        request.setTraineeName("Tina Trainee");
-        return request;
+    private TrainingSearchRequestDTO trainerTrainingsRequest(LocalDate periodFrom, LocalDate periodTo) {
+        return TrainingSearchRequestDTO.builder()
+                .username("trainer.user")
+                .periodFrom(periodFrom)
+                .periodTo(periodTo)
+                .traineeName("Tina Trainee")
+                .build();
     }
 }

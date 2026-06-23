@@ -1,5 +1,6 @@
 package com.epam.gymmanagement.service;
 
+import com.epam.gymmanagement.constant.ProfileStatus;
 import com.epam.gymmanagement.constant.TrainingType;
 import com.epam.gymmanagement.constant.UserRole;
 import com.epam.gymmanagement.entity.*;
@@ -16,11 +17,13 @@ final class ServiceTestFixtures {
     static UserEntity user(String username, UserRole role, boolean active) {
         return UserEntity.builder()
                 .id(UUID.randomUUID())
+                .email(username + "@example.com")
                 .firstName("First")
                 .lastName("Last")
                 .username(username)
                 .password("encoded-" + username)
                 .isActive(active)
+                .profileStatus(active ? ProfileStatus.ACTIVE : ProfileStatus.INACTIVE)
                 .role(role)
                 .build();
     }

@@ -1,11 +1,14 @@
 package com.epam.gymmanagement.service;
 
+import com.epam.gymmanagement.constant.ProfileStatus;
 import com.epam.gymmanagement.constant.UserRole;
 import com.epam.gymmanagement.dto.request.TraineeRegistrationRequestDTO;
-import com.epam.gymmanagement.dto.request.TrainerUsernameRequestDTO;
-import com.epam.gymmanagement.dto.request.update.UpdateTraineeProfileRequestDTO;
-import com.epam.gymmanagement.dto.request.update.UpdateTraineeTrainersRequestDTO;
-import com.epam.gymmanagement.dto.response.*;
+import com.epam.gymmanagement.dto.request.UpdateTraineeProfileRequestDTO;
+import com.epam.gymmanagement.dto.request.UpdateTraineeTrainersRequestDTO;
+import com.epam.gymmanagement.dto.response.AuthResponseDTO;
+import com.epam.gymmanagement.dto.response.MessageResponseDTO;
+import com.epam.gymmanagement.dto.response.UserProfileResponseDTO;
+import com.epam.gymmanagement.dto.response.UserSummaryResponseDTO;
 import com.epam.gymmanagement.entity.TraineeEntity;
 import com.epam.gymmanagement.entity.TrainerEntity;
 import com.epam.gymmanagement.entity.UserEntity;
@@ -44,18 +47,18 @@ public class TraineeService {
     private final TraineeMetrics traineeMetrics;
 
     @Transactional
-    public RegistrationResponseDTO registerTrainee(TraineeRegistrationRequestDTO request) {
+    public AuthResponseDTO registerTrainee(TraineeRegistrationRequestDTO request) {
         String username = usernameGenerator.generate(
                 request.getFirstName(),
                 request.getLastName()
         );
 
         String rawPassword = passwordGenerator.generate();
-
         UserEntity entity = modelMapper.map(request, UserEntity.class);
         entity.setUsername(username);
         entity.setPassword(passwordEncoder.encode(rawPassword));
         entity.setIsActive(true);
+        entity.setProfileStatus(ProfileStatus.ACTIVE);
         entity.setRole(UserRole.TRAINEE);
 
         UserEntity savedUser = userRepository.save(entity);
@@ -69,11 +72,11 @@ public class TraineeService {
         traineeRepository.save(trainee);
         traineeMetrics.getTraineeCreatedCounter().increment();
         log.info("Registered trainee profile for username={}", username);
-        return new RegistrationResponseDTO(username, rawPassword);
+        return AuthResponseDTO.registration(username, rawPassword);
     }
 
     @Transactional(readOnly = true)
-    public TraineeProfileResponseDTO getTraineeProfile(String username) {
+    public UserProfileResponseDTO getTraineeProfile(String username) {
         securityService.requireSelfOrAdmin(username, UserRole.TRAINEE);
 
         TraineeEntity trainee = traineeRepository.findByUserEntity_Username(username)
@@ -83,7 +86,7 @@ public class TraineeService {
     }
 
     @Transactional
-    public TraineeProfileResponseDTO updateTraineeProfile(String username, UpdateTraineeProfileRequestDTO request) {
+    public UserProfileResponseDTO updateTraineeProfile(String username, UpdateTraineeProfileRequestDTO request) {
         securityService.requireSelfOrAdmin(username, UserRole.TRAINEE);
 
         TraineeEntity trainee = traineeRepository.findByUserEntity_Username(username)
@@ -149,7 +152,7 @@ public class TraineeService {
     }
 
     @Transactional(readOnly = true)
-    public List<TrainerShortResponseDTO> getNotAssignedActiveTrainers(String traineeUsername) {
+    public List<UserSummaryResponseDTO> getNotAssignedActiveTrainers(String traineeUsername) {
         securityService.requireSelfOrAdmin(traineeUsername, UserRole.TRAINEE);
 
         TraineeEntity trainee = traineeRepository.findByUserEntity_Username(traineeUsername)
@@ -163,12 +166,12 @@ public class TraineeService {
         return trainerRepository.findByUserEntity_IsActiveTrue()
                 .stream()
                 .filter(trainer -> !assignedTrainerIds.contains(trainer.getId()))
-                .map(gymMapper::toTrainerShortResponse)
+                .map(gymMapper::toTrainerSummaryResponse)
                 .toList();
     }
 
     @Transactional
-    public TrainerAssignmentResponseDTO updateTraineeTrainers(String traineeUsername, UpdateTraineeTrainersRequestDTO request) {
+    public List<UserSummaryResponseDTO> updateTraineeTrainers(String traineeUsername, UpdateTraineeTrainersRequestDTO request) {
         securityService.requireSelfOrAdmin(traineeUsername, UserRole.TRAINEE);
 
         TraineeEntity trainee = traineeRepository.findByUserEntity_Username(traineeUsername)
@@ -176,7 +179,8 @@ public class TraineeService {
 
         List<String> trainerUsernames = request.getTrainers()
                 .stream()
-                .map(TrainerUsernameRequestDTO::getTrainerUsername)
+                .map(String::trim)
+                .distinct()
                 .toList();
 
         List<TrainerEntity> trainers = trainerRepository.findByUserEntity_UsernameIn(trainerUsernames);
@@ -196,14 +200,14 @@ public class TraineeService {
 
         TraineeEntity updatedTrainee = traineeRepository.save(trainee);
 
-        List<TrainerShortResponseDTO> trainerResponses = updatedTrainee.getTrainers()
+        List<UserSummaryResponseDTO> trainerResponses = updatedTrainee.getTrainers()
                 .stream()
-                .map(gymMapper::toTrainerShortResponse)
+                .map(gymMapper::toTrainerSummaryResponse)
                 .toList();
 
         traineeMetrics.getTraineeTrainerAssignmentUpdatedCounter().increment();
         log.info("Updated trainer assignments for trainee username={}", traineeUsername);
-        return new TrainerAssignmentResponseDTO(trainerResponses);
+        return trainerResponses;
     }
 
     private MessageResponseDTO changeTraineeStatus(String username, boolean active, String successMessage) {

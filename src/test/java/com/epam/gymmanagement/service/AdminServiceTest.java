@@ -3,8 +3,8 @@ package com.epam.gymmanagement.service;
 import com.epam.gymmanagement.constant.UserRole;
 import com.epam.gymmanagement.dto.request.AdminRegistrationRequestDTO;
 import com.epam.gymmanagement.dto.response.AdminDashboardResponseDTO;
-import com.epam.gymmanagement.dto.response.AdminUserSummaryResponseDTO;
 import com.epam.gymmanagement.dto.response.MessageResponseDTO;
+import com.epam.gymmanagement.dto.response.UserSummaryResponseDTO;
 import com.epam.gymmanagement.entity.UserEntity;
 import com.epam.gymmanagement.exception.BadRequestException;
 import com.epam.gymmanagement.repository.TraineeRepository;
@@ -116,8 +116,8 @@ class AdminServiceTest {
     void dashboardReturnsCountsAndSortedUserSummaries() {
         UserEntity admin = ServiceTestFixtures.user("admin.user", UserRole.ADMIN, true);
         UserEntity trainer = ServiceTestFixtures.user("trainer.user", UserRole.TRAINER, false);
-        AdminUserSummaryResponseDTO adminSummary = new AdminUserSummaryResponseDTO();
-        AdminUserSummaryResponseDTO trainerSummary = new AdminUserSummaryResponseDTO();
+        UserSummaryResponseDTO adminSummary = new UserSummaryResponseDTO();
+        UserSummaryResponseDTO trainerSummary = new UserSummaryResponseDTO();
 
         when(userRepository.count()).thenReturn(3L);
         when(userRepository.countByIsActive(true)).thenReturn(2L);
@@ -127,8 +127,8 @@ class AdminServiceTest {
         when(trainerRepository.count()).thenReturn(1L);
         when(trainingRepository.count()).thenReturn(4L);
         when(userRepository.findAll(any(Sort.class))).thenReturn(List.of(admin, trainer));
-        when(modelMapper.map(admin, AdminUserSummaryResponseDTO.class)).thenReturn(adminSummary);
-        when(modelMapper.map(trainer, AdminUserSummaryResponseDTO.class)).thenReturn(trainerSummary);
+        when(modelMapper.map(admin, UserSummaryResponseDTO.class)).thenReturn(adminSummary);
+        when(modelMapper.map(trainer, UserSummaryResponseDTO.class)).thenReturn(trainerSummary);
         when(userRoleResolver.resolve(admin)).thenReturn(UserRole.ADMIN);
         when(userRoleResolver.resolve(trainer)).thenReturn(UserRole.TRAINER);
 

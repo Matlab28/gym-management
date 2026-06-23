@@ -1,10 +1,11 @@
 package com.epam.gymmanagement.service;
 
+import com.epam.gymmanagement.constant.ProfileStatus;
 import com.epam.gymmanagement.constant.UserRole;
 import com.epam.gymmanagement.dto.request.AdminRegistrationRequestDTO;
 import com.epam.gymmanagement.dto.response.AdminDashboardResponseDTO;
-import com.epam.gymmanagement.dto.response.AdminUserSummaryResponseDTO;
 import com.epam.gymmanagement.dto.response.MessageResponseDTO;
+import com.epam.gymmanagement.dto.response.UserSummaryResponseDTO;
 import com.epam.gymmanagement.entity.UserEntity;
 import com.epam.gymmanagement.exception.BadRequestException;
 import com.epam.gymmanagement.repository.TraineeRepository;
@@ -49,6 +50,7 @@ public class AdminService {
         UserEntity user = modelMapper.map(request, UserEntity.class);
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setIsActive(true);
+        user.setProfileStatus(ProfileStatus.ACTIVE);
         user.setRole(UserRole.ADMIN);
 
         userRepository.save(user);
@@ -60,7 +62,7 @@ public class AdminService {
     public AdminDashboardResponseDTO dashboard() {
         securityService.requireRole(UserRole.ADMIN);
 
-        List<AdminUserSummaryResponseDTO> users = userRepository.findAll(Sort.by("username"))
+        List<UserSummaryResponseDTO> users = userRepository.findAll(Sort.by("username"))
                 .stream()
                 .map(this::toUserSummary)
                 .toList();
@@ -77,9 +79,8 @@ public class AdminService {
         );
     }
 
-    private AdminUserSummaryResponseDTO toUserSummary(UserEntity user) {
-        AdminUserSummaryResponseDTO response =
-                modelMapper.map(user, AdminUserSummaryResponseDTO.class);
+    private UserSummaryResponseDTO toUserSummary(UserEntity user) {
+        UserSummaryResponseDTO response = modelMapper.map(user, UserSummaryResponseDTO.class);
 
         response.setActive(user.getIsActive());
         response.setRole(userRoleResolver.resolve(user));

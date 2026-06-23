@@ -1,6 +1,9 @@
 package com.epam.gymmanagement.security;
 
 import com.epam.gymmanagement.constant.UserRole;
+import com.epam.gymmanagement.entity.UserEntity;
+import com.epam.gymmanagement.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -13,21 +16,24 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class SecurityService {
+    private final UserRepository userRepository;
+
     public void requireAuthenticated() {
         currentUsername();
     }
 
     public String currentUsername() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String principalName = currentAuthentication().getName();
 
-        if (authentication == null
-                || !authentication.isAuthenticated()
-                || authentication instanceof AnonymousAuthenticationToken) {
-            throw new AccessDeniedException("Authentication is required");
+        if (principalName.contains("@")) {
+            return userRepository.findByEmailIgnoreCase(principalName)
+                    .map(UserEntity::getUsername)
+                    .orElse(principalName);
         }
 
-        return authentication.getName();
+        return principalName;
     }
 
     public boolean hasRole(UserRole role) {

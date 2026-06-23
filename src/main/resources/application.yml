@@ -25,6 +25,18 @@ spring:
       export:
         otlp:
           endpoint: ${OTEL_EXPORTER_OTLP_LOGS_ENDPOINT:http://localhost:4318/v1/logs}
+  mail:
+    host: ${MAIL_HOST:smtp-relay.brevo.com}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME:af5770001@smtp-brevo.com}
+    password: ${MAIL_PASSWORD:bskKqlkelbtYYgF}
+    from: ${MAIL_FROM:verifyy.testt@gmail.com}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
 
 security:
   jwt:
@@ -36,6 +48,7 @@ management:
     web:
       exposure:
         include: health,info,metrics,prometheus
+  #    include: '*'
   endpoint:
     health:
       show-details: always
@@ -58,3 +71,5 @@ logging:
     console: "%clr(%d{yyyy-MM-dd HH:mm:ss}){faint} %clr([%thread]){magenta} %clr(%-5level) %clr([%X{transactionId}]){cyan} %clr(%logger{36}){blue} %clr(-){faint} %msg%n"
 
 kind: Application
+
+# Separate configuration for different environments - logging
