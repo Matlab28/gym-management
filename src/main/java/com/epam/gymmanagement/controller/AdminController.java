@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -24,6 +25,7 @@ public class AdminController {
     private final AdminService adminService;
 
     @PostMapping("/register")
+    @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Register a new admin")
     public ResponseEntity<MessageResponseDTO> registerAdmin(
             @Valid @RequestBody AdminRegistrationRequestDTO request
@@ -33,6 +35,7 @@ public class AdminController {
     }
 
     @GetMapping("/dashboard")
+    @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Get admin dashboard data")
     public ResponseEntity<AdminDashboardResponseDTO> dashboard() {
         AdminDashboardResponseDTO response = adminService.dashboard();

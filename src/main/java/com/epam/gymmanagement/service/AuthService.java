@@ -1,18 +1,16 @@
 package com.epam.gymmanagement.service;
 
+import com.epam.gymmanagement.constant.AttemptType;
 import com.epam.gymmanagement.constant.ProfileStatus;
 import com.epam.gymmanagement.constant.UserRole;
-import com.epam.gymmanagement.dto.request.ChangePasswordRequestDTO;
-import com.epam.gymmanagement.dto.request.ConfirmRequestDto;
-import com.epam.gymmanagement.dto.request.LoginRequestDTO;
-import com.epam.gymmanagement.dto.request.RegisterRequestDTO;
-import com.epam.gymmanagement.dto.request.ResendConfirmationRequestDTO;
+import com.epam.gymmanagement.dto.request.*;
 import com.epam.gymmanagement.dto.response.AuthResponseDTO;
 import com.epam.gymmanagement.dto.response.MessageResponseDTO;
 import com.epam.gymmanagement.entity.UserEntity;
 import com.epam.gymmanagement.exception.BadRequestException;
 import com.epam.gymmanagement.exception.NotFoundException;
 import com.epam.gymmanagement.repository.UserRepository;
+import com.epam.gymmanagement.security.BruteForceProtectionService;
 import com.epam.gymmanagement.security.JwtService;
 import com.epam.gymmanagement.security.SecurityService;
 import com.epam.gymmanagement.security.UserRoleResolver;
@@ -47,6 +45,7 @@ public class AuthService {
     private final UserRoleResolver userRoleResolver;
     private final JavaMailSender javaMailSender;
     private final SecureRandom secureRandom = new SecureRandom();
+    private final BruteForceProtectionService bruteForceProtectionService;
 
     @Value("${spring.mail.from}")
     private String mailFrom;
@@ -239,8 +238,20 @@ public class AuthService {
     public AuthResponseDTO login(LoginRequestDTO request) {
         String login = normalizeLogin(request);
 
+        bruteForceProtectionService.checkNotBlocked(
+                AttemptType.PASSWORD_LOGIN,
+                login
+        );
+
         UserEntity user = findByEmailOrUsername(login)
-                .orElseThrow(() -> new BadRequestException("Invalid email or password"));
+                .orElseThrow(() -> {
+                    bruteForceProtectionService.registerFailure(
+                            AttemptType.PASSWORD_LOGIN,
+                            login
+                    );
+
+                    return new BadRequestException("Invalid email or password");
+                });
 
         if (user.getProfileStatus() != ProfileStatus.ACTIVE) {
             throw new BadRequestException("Please confirm your email before logging in.");
@@ -252,8 +263,18 @@ public class AuthService {
         );
 
         if (!passwordMatches) {
+            bruteForceProtectionService.registerFailure(
+                    AttemptType.PASSWORD_LOGIN,
+                    login
+            );
+
             throw new BadRequestException("Invalid email or password");
         }
+
+        bruteForceProtectionService.registerSuccess(
+                AttemptType.PASSWORD_LOGIN,
+                login
+        );
 
         String token = jwtService.generateToken(tokenSubject(user));
         UserRole role = userRoleResolver.resolve(user);
@@ -262,6 +283,7 @@ public class AuthService {
 
         return AuthResponseDTO.login("Login successful", token, role.name());
     }
+
 
     @Transactional
     public MessageResponseDTO changePassword(ChangePasswordRequestDTO request) {
@@ -311,6 +333,11 @@ public class AuthService {
     public AuthResponseDTO confirm(ConfirmRequestDto dto) {
         String email = normalizeEmail(dto.getEmail());
 
+        bruteForceProtectionService.checkNotBlocked(
+                AttemptType.EMAIL_VERIFICATION,
+                email
+        );
+
         UserEntity user = userRepository.findByEmailIgnoreCase(email)
                 .orElseThrow(() -> new NotFoundException("User not found"));
 
@@ -319,6 +346,11 @@ public class AuthService {
         }
 
         if (user.getConfirmationCode() == null || user.getConfirmationCodeExpiresAt() == null) {
+            bruteForceProtectionService.registerFailure(
+                    AttemptType.EMAIL_VERIFICATION,
+                    email
+            );
+
             throw new BadRequestException("Confirmation code was not generated. Please request a new code.");
         }
 
@@ -332,8 +364,18 @@ public class AuthService {
         );
 
         if (!confirmationMatches) {
+            bruteForceProtectionService.registerFailure(
+                    AttemptType.EMAIL_VERIFICATION,
+                    email
+            );
+
             throw new BadRequestException("Invalid confirmation code.");
         }
+
+        bruteForceProtectionService.registerSuccess(
+                AttemptType.EMAIL_VERIFICATION,
+                email
+        );
 
         user.setProfileStatus(ProfileStatus.ACTIVE);
         user.setIsActive(true);
@@ -390,48 +432,48 @@ public class AuthService {
                     <meta name="viewport" content="width=device-width, initial-scale=1.0">
                     <title>Email Confirmation</title>
                 </head>
-
+                
                 <body style="margin:0; padding:0; background-color:#f4f6f8; font-family:Arial, Helvetica, sans-serif;">
                     <table width="100%%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f4f6f8; padding:40px 0;">
                         <tr>
                             <td align="center">
-
+                
                                 <table width="100%%" cellpadding="0" cellspacing="0" border="0"
                                        style="max-width:600px; background-color:#ffffff; border-radius:14px; overflow:hidden; box-shadow:0 8px 24px rgba(0,0,0,0.08);">
-
+                
                                     <tr>
                                         <td align="center" style="background-color:#111827; padding:32px 24px;">
                                             <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/72/Effective_Programming_for_America_logo.svg/3840px-Effective_Programming_for_America_logo.svg.png"
                                                  alt="EPAM Logo"
                                                  width="150"
                                                  style="display:block; margin:0 auto 18px auto; max-width:150px; height:auto;">
-
+                
                                             <h1 style="margin:0; color:#ffffff; font-size:24px; font-weight:700; letter-spacing:0.3px;">
                                                 EPAM Gym Management
                                             </h1>
-
+                
                                             <p style="margin:8px 0 0 0; color:#d1d5db; font-size:14px;">
                                                 Email Confirmation
                                             </p>
                                         </td>
                                     </tr>
-
+                
                                     <tr>
                                         <td style="padding:36px 32px 28px 32px;">
-
+                
                                             <h2 style="margin:0 0 18px 0; color:#111827; font-size:22px; font-weight:700;">
                                                 Confirm Your Registration
                                             </h2>
-
+                
                                             <p style="margin:0 0 18px 0; color:#374151; font-size:16px; line-height:1.6;">
                                                 Hi,
                                             </p>
-
+                
                                             <p style="margin:0 0 18px 0; color:#374151; font-size:16px; line-height:1.6;">
                                                 Thank you for your <strong>EPAM Gym Management</strong> registration.
                                                 Please use the confirmation code below to complete your email verification.
                                             </p>
-
+                
                                             <div style="margin:32px 0; text-align:center;">
                                                 <div style="display:inline-block; background-color:#f3f4f6; border:1px solid #d1d5db; border-radius:10px; padding:18px 34px;">
                                                     <span style="color:#111827; font-size:30px; font-weight:700; letter-spacing:5px;">
@@ -439,22 +481,22 @@ public class AuthService {
                                                     </span>
                                                 </div>
                                             </div>
-
+                
                                             <p style="margin:0 0 16px 0; color:#374151; font-size:15px; line-height:1.6;">
                                                 Enter this code in the application to activate your account.
                                             </p>
-
+                
                                             <p style="margin:24px 0 0 0; padding:14px 16px; background-color:#fff7ed; border-left:4px solid #f97316; color:#9a3412; font-size:14px; line-height:1.6;">
                                                 <strong>Security notice:</strong> Do not share this code with anyone.
                                             </p>
-
+                
                                             <p style="margin:28px 0 0 0; color:#6b7280; font-size:14px; line-height:1.6;">
                                                 If you did not request this registration, you can safely ignore this email.
                                             </p>
-
+                
                                         </td>
                                     </tr>
-
+                
                                     <tr>
                                         <td align="center" style="background-color:#f9fafb; padding:22px 24px; border-top:1px solid #e5e7eb;">
                                             <p style="margin:0; color:#9ca3af; font-size:12px; line-height:1.5;">
@@ -462,9 +504,9 @@ public class AuthService {
                                             </p>
                                         </td>
                                     </tr>
-
+                
                                 </table>
-
+                
                             </td>
                         </tr>
                     </table>

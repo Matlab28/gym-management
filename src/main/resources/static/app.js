@@ -213,12 +213,22 @@ function registerTemplate() {
             </div>
             <div class="field">
                 <label for="registerPassword">Password</label>
-                <input id="registerPassword" name="password" type="password" autocomplete="new-password" required>
+                <div class="password-control">
+                    <input id="registerPassword" name="password" type="password" autocomplete="new-password" required>
+                    <button class="password-toggle" type="button" data-toggle-password="registerPassword" aria-label="Show password" aria-pressed="false">
+                        ${eyeIcon()}
+                    </button>
+                </div>
                 <span class="field-hint">Needs uppercase, lowercase, and a number.</span>
             </div>
             <div class="field">
                 <label for="registerPassConfirm">Confirm password</label>
-                <input id="registerPassConfirm" name="passConfirm" type="password" autocomplete="new-password" required>
+                <div class="password-control">
+                    <input id="registerPassConfirm" name="passConfirm" type="password" autocomplete="new-password" required>
+                    <button class="password-toggle" type="button" data-toggle-password="registerPassConfirm" aria-label="Show password" aria-pressed="false">
+                        ${eyeIcon()}
+                    </button>
+                </div>
             </div>
             <div class="actions">
                 <button class="button" type="submit">Send confirmation code</button>
@@ -322,6 +332,8 @@ function bindRegisterForm() {
     const form = document.querySelector("#registerForm");
     const status = document.querySelector("#registerStatus");
     const confirmButton = document.querySelector("[data-go-confirm]");
+
+    bindPasswordToggles(form);
 
     confirmButton?.addEventListener("click", () => {
         location.hash = "#/confirm";
@@ -521,6 +533,44 @@ function updateSpecializationOptions() {
         .map((type) => `<option value="${type}">${type}</option>`)
         .join("");
     select.required = role === ROLES.trainer;
+}
+
+function bindPasswordToggles(scope) {
+    scope.querySelectorAll("[data-toggle-password]").forEach((button) => {
+        button.addEventListener("click", () => {
+            const input = document.querySelector(`#${button.dataset.togglePassword}`);
+            if (!input) {
+                return;
+            }
+
+            const willShow = input.type === "password";
+            input.type = willShow ? "text" : "password";
+            button.innerHTML = willShow ? eyeOffIcon() : eyeIcon();
+            button.setAttribute("aria-label", willShow ? "Hide password" : "Show password");
+            button.setAttribute("aria-pressed", String(willShow));
+            input.focus();
+        });
+    });
+}
+
+function eyeIcon() {
+    return `
+        <svg aria-hidden="true" viewBox="0 0 24 24" focusable="false">
+            <path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z"></path>
+            <circle cx="12" cy="12" r="3"></circle>
+        </svg>
+    `;
+}
+
+function eyeOffIcon() {
+    return `
+        <svg aria-hidden="true" viewBox="0 0 24 24" focusable="false">
+            <path d="M3 3l18 18"></path>
+            <path d="M10.6 10.6A2 2 0 0 0 12 14a2 2 0 0 0 1.4-.6"></path>
+            <path d="M7.4 7.4C4.3 9 2.5 12 2.5 12s3.5 6 9.5 6c1.6 0 3-.4 4.2-1"></path>
+            <path d="M12 6c6 0 9.5 6 9.5 6a16 16 0 0 1-2.4 3.1"></path>
+        </svg>
+    `;
 }
 
 function selectedRole() {

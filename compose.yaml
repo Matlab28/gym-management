@@ -1,9 +1,40 @@
 services:
   postgres:
-    image: 'postgres:latest'
+    image: postgres:latest
+    container_name: gym-management-postgres
     environment:
-      - 'POSTGRES_DB=mydatabase'
-      - 'POSTGRES_PASSWORD=secret'
-      - 'POSTGRES_USER=myuser'
+      POSTGRES_DB: gym_management
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
-      - '5432'
+      - "5432:5432"
+
+  Prometheus:
+    image: 'prom/prometheus:v2.44.0'
+    container_name: 'Prometheus'
+    restart: unless-stopped
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+    ports:
+      - '9090:9090'
+    volumes:
+      - './data/prometheus/config/prometheus.yaml:/etc/prometheus/prometheus.yml'
+
+  Grafana:
+    image: 'grafana/grafana:12.4.4'
+    pull_policy: always
+    container_name: 'Grafana'
+    restart: unless-stopped
+    user: root
+    ports:
+      - '3000:3000'
+    volumes:
+      - './grafana:/var/lib/grafana'
+    environment:
+      - 'GF_SECURITY_ADMIN_USER=admin'
+      - 'GF_SECURITY_ADMIN_PASSWORD=secret'
+      - 'GF_USERS_ALLOW_SIGN_UP=false'
+      - 'GF_LOG_MODE=console file'
+      - 'GF_LOG_FILTERS=alerting=debug,auth=debug,backend=debug,datasource=debug,db=debug,plugins=debug,rendering=debug,server=debug,sqlstore=debug,utils=debug'
+    depends_on:
+      - Prometheus
