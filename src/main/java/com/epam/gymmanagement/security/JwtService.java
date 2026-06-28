@@ -20,8 +20,7 @@ public class JwtService {
 
     public JwtService(
             @Value("${security.jwt.secret}") String secret,
-            @Value("${security.jwt.expiration-ms:86400000}") long expirationMs
-    ) {
+            @Value("${security.jwt.expiration-ms:86400000}") long expirationMs) {
         this.secret = secret;
         this.expirationMs = expirationMs;
     }
@@ -64,4 +63,6 @@ public class JwtService {
     private Key signingKey() {
         return Keys.hmacShaKeyFor(Decoders.BASE64.decode(secret));
     }
+
+
 }

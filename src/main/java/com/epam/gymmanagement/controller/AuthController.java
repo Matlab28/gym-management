@@ -1,10 +1,6 @@
 package com.epam.gymmanagement.controller;
 
-import com.epam.gymmanagement.dto.request.ChangePasswordRequestDTO;
-import com.epam.gymmanagement.dto.request.ConfirmRequestDto;
-import com.epam.gymmanagement.dto.request.LoginRequestDTO;
-import com.epam.gymmanagement.dto.request.RegisterRequestDTO;
-import com.epam.gymmanagement.dto.request.ResendConfirmationRequestDTO;
+import com.epam.gymmanagement.dto.request.*;
 import com.epam.gymmanagement.dto.response.AuthResponseDTO;
 import com.epam.gymmanagement.dto.response.MessageResponseDTO;
 import com.epam.gymmanagement.service.AuthService;
@@ -33,6 +29,17 @@ public class AuthController {
     ) {
         AuthResponseDTO response = authService.login(request);
         return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/sign-out")
+    @Operation(summary = "Sign out the current user and invalidate the JWT token")
+    public ResponseEntity<MessageResponseDTO> signOut(@RequestHeader("Authorization") String authorizationHeader) {
+        if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
+            throw new IllegalArgumentException("Invalid Authorization header");
+        }
+
+        String token = authorizationHeader.substring(7);
+        return ResponseEntity.ok(authService.signOut(token));
     }
 
     @PostMapping("/register")

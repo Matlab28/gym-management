@@ -10,10 +10,7 @@ import com.epam.gymmanagement.entity.UserEntity;
 import com.epam.gymmanagement.exception.BadRequestException;
 import com.epam.gymmanagement.exception.NotFoundException;
 import com.epam.gymmanagement.repository.UserRepository;
-import com.epam.gymmanagement.security.BruteForceProtectionService;
-import com.epam.gymmanagement.security.JwtService;
-import com.epam.gymmanagement.security.SecurityService;
-import com.epam.gymmanagement.security.UserRoleResolver;
+import com.epam.gymmanagement.security.*;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +19,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.MailException;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -43,6 +41,7 @@ public class AuthService {
     private final JwtService jwtService;
     private final SecurityService securityService;
     private final UserRoleResolver userRoleResolver;
+    private final UserSessionService userSessionService;
     private final JavaMailSender javaMailSender;
     private final SecureRandom secureRandom = new SecureRandom();
     private final BruteForceProtectionService bruteForceProtectionService;
@@ -277,6 +276,7 @@ public class AuthService {
         );
 
         String token = jwtService.generateToken(tokenSubject(user));
+        userSessionService.createSession(user, token);
         UserRole role = userRoleResolver.resolve(user);
 
         log.info("User with email={} logged in with role {}", user.getEmail(), role);
@@ -284,40 +284,38 @@ public class AuthService {
         return AuthResponseDTO.login("Login successful", token, role.name());
     }
 
-
     @Transactional
     public MessageResponseDTO changePassword(ChangePasswordRequestDTO request) {
         UserEntity user = findPasswordChangeUser(request);
+
         securityService.requireSameUserOrAdmin(user.getUsername());
 
         if (user.getProfileStatus() == ProfileStatus.INACTIVE) {
-            log.warn("Attempt to change password for inactive user: {}", user.getId());
             throw new BadRequestException("User profile is inactive");
         } else if (user.getProfileStatus() == ProfileStatus.PENDING) {
-            log.warn("Attempt to change password for pending user: {}", user.getId());
             throw new BadRequestException("User profile is pending approval");
         } else if (user.getProfileStatus() == ProfileStatus.SUSPENDED) {
-            log.warn("Attempt to change password for suspended user: {}", user.getId());
             throw new BadRequestException("User profile is suspended");
         } else if (user.getProfileStatus() == ProfileStatus.DELETED) {
-            log.warn("Attempt to change password for deleted user: {}", user.getId());
             throw new BadRequestException("User profile is deleted");
         }
 
-        boolean oldPasswordMatches = passwordEncoder.matches(
+        if (!passwordEncoder.matches(
                 request.getOldPassword(),
-                user.getPassword()
-        );
+                user.getPassword())) {
 
-        if (!oldPasswordMatches) {
-            log.warn("\"{}\" ID of user's old password doesn't match ", user.getId());
             throw new BadRequestException("Old password is incorrect");
         }
 
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
         userRepository.save(user);
-        log.info("Password changed for username={}", user.getUsername());
-        return new MessageResponseDTO("Password changed successfully");
+        userSessionService.signOutAll(user);
+
+        log.info("Password changed successfully for username={}", user.getUsername());
+
+        return new MessageResponseDTO(
+                "Password changed successfully. Please log in again."
+        );
     }
 
     @Transactional(readOnly = true)
@@ -327,6 +325,23 @@ public class AuthService {
                 .orElseThrow(() -> new NotFoundException("User not found"));
 
         return AuthResponseDTO.session(username, userRoleResolver.resolve(user).name());
+    }
+
+    private String extractBearerToken(String header) {
+        if (header == null || !header.startsWith("Bearer ")) {
+            throw new BadRequestException("Authorization token is required.");
+        }
+
+        return header.substring(7).trim();
+    }
+
+    @Transactional
+    public MessageResponseDTO signOut(String authorizationHeader) {
+        String token = extractBearerToken(authorizationHeader);
+        userSessionService.signOut(token);
+        SecurityContextHolder.clearContext();
+        log.info("User signed out.");
+        return new MessageResponseDTO("Signed out successfully.");
     }
 
     @Transactional
@@ -345,17 +360,23 @@ public class AuthService {
             throw new BadRequestException("Email is already confirmed.");
         }
 
-        if (user.getConfirmationCode() == null || user.getConfirmationCodeExpiresAt() == null) {
+        if (user.getConfirmationCode() == null
+                || user.getConfirmationCodeExpiresAt() == null) {
+
             bruteForceProtectionService.registerFailure(
                     AttemptType.EMAIL_VERIFICATION,
                     email
             );
 
-            throw new BadRequestException("Confirmation code was not generated. Please request a new code.");
+            throw new BadRequestException(
+                    "Confirmation code was not generated. Please request a new code."
+            );
         }
 
         if (user.getConfirmationCodeExpiresAt().isBefore(Instant.now())) {
-            throw new BadRequestException("Confirmation code expired. Please request a new code.");
+            throw new BadRequestException(
+                    "Confirmation code expired. Please request a new code."
+            );
         }
 
         boolean confirmationMatches = passwordEncoder.matches(
@@ -364,6 +385,7 @@ public class AuthService {
         );
 
         if (!confirmationMatches) {
+
             bruteForceProtectionService.registerFailure(
                     AttemptType.EMAIL_VERIFICATION,
                     email
@@ -385,12 +407,10 @@ public class AuthService {
 
         userRepository.save(user);
 
-        String token = jwtService.generateToken(tokenSubject(user));
         log.info("Email confirmed successfully for email={}", user.getEmail());
-
         return AuthResponseDTO.register(
-                "Email confirmed successfully! Thank you for your registration.",
-                token
+                "Email confirmed successfully. Please log in.",
+                null
         );
     }
 

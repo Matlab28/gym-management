@@ -3,7 +3,7 @@ spring:
     url: ${STG_DB_URL:jdbc:postgresql://stg-db:5432/gym_management_stg}
     driver-class-name: org.postgresql.Driver
     username: ${STG_DB_USERNAME:gym_stg}
-    password: ${STG_DB_PASSWORD:}
+    password: ${STG_DB_PASSWORD}
   jpa:
     hibernate:
       ddl-auto: validate

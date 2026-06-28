@@ -27,7 +27,7 @@ public class AdminController {
     @PostMapping("/register")
     @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Register a new admin")
-    public ResponseEntity<MessageResponseDTO> registerAdmin(
+    public ResponseEntity<MessageResponseDTO> registerAdmin( // Add signout.
             @Valid @RequestBody AdminRegistrationRequestDTO request
     ) {
         MessageResponseDTO response = adminService.registerAdmin(request);

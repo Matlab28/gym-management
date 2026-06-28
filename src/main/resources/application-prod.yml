@@ -3,7 +3,7 @@ spring:
     url: ${PROD_DB_URL:jdbc:postgresql://prod-db:5432/gym_management}
     driver-class-name: org.postgresql.Driver
     username: ${PROD_DB_USERNAME:gym_prod}
-    password: ${PROD_DB_PASSWORD:}
+    password: ${PROD_DB_PASSWORD}
   jpa:
     hibernate:
       ddl-auto: validate
