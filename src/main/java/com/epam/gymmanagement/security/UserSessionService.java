@@ -74,4 +74,9 @@ public class UserSessionService {
 
         userSessionRepository.saveAll(sessions);
     }
+
+    @Transactional
+    public void deleteAllForUser(UserEntity user) {
+        userSessionRepository.deleteAllByUser(user);
+    }
 }

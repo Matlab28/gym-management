@@ -1,0 +1,104 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Gym Management microservices with ActiveMQ on a single Docker-based EC2 instance
+
+Parameters:
+  ArtifactBucket:
+    Type: String
+  ArtifactKey:
+    Type: String
+  InstanceType:
+    Type: String
+    Default: t3.small
+    AllowedValues: [t3.micro, t3.small]
+  LatestAmiId:
+    Type: AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>
+    Default: /aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64
+
+Resources:
+  GymSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Public HTTP access to Gym Management API and Swagger UI
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+      Tags:
+        - Key: Name
+          Value: gym-microservices-http
+
+  GymInstanceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ec2.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
+      Policies:
+        - PolicyName: ReadDeploymentArtifact
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action: s3:GetObject
+                Resource: !Sub arn:${AWS::Partition}:s3:::${ArtifactBucket}/${ArtifactKey}
+
+  GymInstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Roles: [!Ref GymInstanceRole]
+
+  GymInstance:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: !Ref LatestAmiId
+      InstanceType: !Ref InstanceType
+      IamInstanceProfile: !Ref GymInstanceProfile
+      SecurityGroupIds: [!GetAtt GymSecurityGroup.GroupId]
+      BlockDeviceMappings:
+        - DeviceName: /dev/xvda
+          Ebs:
+            DeleteOnTermination: true
+            Encrypted: true
+            VolumeSize: 20
+            VolumeType: gp3
+      Tags:
+        - Key: Name
+          Value: gym-microservices
+      UserData:
+        Fn::Base64: !Sub |
+          #!/bin/bash
+          set -euxo pipefail
+          dnf install -y docker unzip openssl
+          systemctl enable --now docker
+          mkdir -p /usr/local/lib/docker/cli-plugins /opt/gym-microservices
+          curl -fsSL https://github.com/docker/compose/releases/download/v2.29.7/docker-compose-linux-x86_64 \
+            -o /usr/local/lib/docker/cli-plugins/docker-compose
+          chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
+          aws s3 cp s3://${ArtifactBucket}/${ArtifactKey} /tmp/gym-runtime.zip
+          unzip -o /tmp/gym-runtime.zip -d /opt/gym-microservices
+          cd /opt/gym-microservices
+          POSTGRES_PASSWORD="$(openssl rand -hex 24)"
+          JWT_SECRET="$(openssl rand -base64 64 | tr -d '\n')"
+          ACTIVEMQ_PASSWORD="$(openssl rand -hex 24)"
+          printf 'POSTGRES_PASSWORD=%s\nJWT_SECRET=%s\nACTIVEMQ_PASSWORD=%s\nPUBLIC_PORT=80\n' \
+            "$POSTGRES_PASSWORD" "$JWT_SECRET" "$ACTIVEMQ_PASSWORD" > .env
+          chmod 600 .env
+          docker compose up -d --build
+
+Outputs:
+  ApiBaseUrl:
+    Description: Public API base URL
+    Value: !Sub http://${GymInstance.PublicDnsName}
+  SwaggerUrl:
+    Description: Unified Swagger UI
+    Value: !Sub http://${GymInstance.PublicDnsName}/docs/
+  InstanceId:
+    Description: EC2 instance ID for Session Manager access
+    Value: !Ref GymInstance

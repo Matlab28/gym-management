@@ -3,6 +3,7 @@ package com.epam.gymmanagement.service;
 import com.epam.gymmanagement.constant.ProfileStatus;
 import com.epam.gymmanagement.constant.TrainingType;
 import com.epam.gymmanagement.constant.UserRole;
+import com.epam.gymmanagement.constant.WorkloadActionType;
 import com.epam.gymmanagement.dto.request.AddTrainingRequestDTO;
 import com.epam.gymmanagement.dto.request.TrainingSearchRequestDTO;
 import com.epam.gymmanagement.dto.response.MessageResponseDTO;
@@ -28,6 +29,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -40,6 +42,7 @@ public class TrainingService {
     private final GymMapper gymMapper;
     private final SecurityService securityService;
     private final ModelMapper modelMapper;
+    private final TrainerWorkloadIntegrationService workloadIntegrationService;
 
     @Transactional
     public MessageResponseDTO addTraining(AddTrainingRequestDTO request) {
@@ -92,6 +95,7 @@ public class TrainingService {
                 .build();
 
         trainingRepository.save(training);
+        workloadIntegrationService.updateWorkload(training, WorkloadActionType.ADD);
         log.info(
                 "Added training name: \"{}\" trainee: \"{}\" trainer: \"{}\"",
                 request.getTrainingName(),
@@ -99,6 +103,29 @@ public class TrainingService {
                 request.getTrainerUsername()
         );
         return new MessageResponseDTO("Training added successfully");
+    }
+
+    @Transactional
+    public MessageResponseDTO deleteTraining(UUID trainingId) {
+        securityService.requireRole(UserRole.ADMIN, UserRole.TRAINER);
+
+        TrainingEntity training = trainingRepository.findById(trainingId)
+                .orElseThrow(() -> new NotFoundException("Training not found"));
+
+        String trainerUsername = training.getTrainer().getUserEntity().getUsername();
+        if (!securityService.hasRole(UserRole.ADMIN)
+                && !securityService.currentUsername().equals(trainerUsername)) {
+            throw new AccessDeniedException("Trainer can delete only own trainings");
+        }
+
+        if (training.getTrainingDate().isBefore(LocalDate.now())) {
+            throw new BadRequestException("Completed training cannot be cancelled");
+        }
+
+        trainingRepository.delete(training);
+        workloadIntegrationService.updateWorkload(training, WorkloadActionType.DELETE);
+        log.info("Cancelled training: trainingId={}, trainerUsername={}", trainingId, trainerUsername);
+        return new MessageResponseDTO("Training deleted successfully");
     }
 
     @Transactional(readOnly = true)

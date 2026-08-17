@@ -1,0 +1,2156 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Gym Management Backend API",
+    "description": "Custom OpenAPI documentation for the Gym Management microservices. The platform\nmanages authentication, trainees, trainers, assignments, training sessions, and\nsynchronized monthly trainer workload.",
+    "contact": {
+      "name": "Gym Management API Team"
+    },
+    "license": {
+      "name": "Apache 2.0",
+      "url": "https://www.apache.org/licenses/LICENSE-2.0"
+    },
+    "version": "1.0.0"
+  },
+  "externalDocs": {
+    "description": "Microservices setup and runbook",
+    "url": "https://github.com/Matlab28/gym-management"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8080",
+      "description": "Gym Management microservice"
+    },
+    {
+      "url": "http://localhost:8080/workload",
+      "description": "Trainer Workload microservice"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Gym Management User Profile Controller",
+      "description": "Endpoints for managing user profile operations"
+    },
+    {
+      "name": "Gym Management Trainee Controller",
+      "description": "Endpoints for managing trainee profiles and their assigned trainers"
+    },
+    {
+      "name": "Gym Management Administration Controller",
+      "description": "Registering new admins and providing admin dashboard data"
+    },
+    {
+      "name": "Gym Management Trainer Controller",
+      "description": "Endpoints for managing trainer profiles, including registration, profile updates, and activation/deactivation"
+    },
+    {
+      "name": "Gym Management Training Controller",
+      "description": "Endpoints for managing training sessions, including adding new trainings and retrieving trainings for trainees and trainers"
+    },
+    {
+      "name": "Gym Management Authentication Controller",
+      "description": "Endpoints for user authentication and session management"
+    },
+    {
+      "name": "Trainer Workload Aggregation Controller",
+      "description": "Manage and retrieve yearly and monthly trainer workload summaries"
+    }
+  ],
+  "paths": {
+    "/api/v1/users/update/{userId}/profile": {
+      "put": {
+        "tags": [
+          "Gym Management User Profile Controller"
+        ],
+        "summary": "Update user profile by user ID",
+        "operationId": "updateUserProfile",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserProfileResponseDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserProfileResponseDTO"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer Authentication": [
+
+            ]
+          }
+        ]
+      }
+    },
+    "/api/v1/trainers/update/{username}": {
+      "put": {
+        "tags": [
+          "Gym Management Trainer Controller"
+        ],
+        "summary": "Update a trainer profile by username",
+        "operationId": "updateTrainerProfile",
+        "parameters": [
+          {
+            "name": "username",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateTrainerProfileRequestDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserProfileResponseDTO"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer Authentication": [
+
+            ]
+          }
+        ]
+      }
+    },
+    "/api/v1/trainees/update/{username}": {
+      "put": {
+        "tags": [
+          "Gym Management Trainee Controller"
+        ],
+        "summary": "Update a trainee profile by username",
+        "operationId": "updateTraineeProfile",
+        "parameters": [
+          {
+            "name": "username",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateTraineeProfileRequestDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserProfileResponseDTO"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer Authentication": [
+
+            ]
+          }
+        ]
+      }
+    },
+    "/api/v1/trainees/update/{username}/trainers": {
+      "put": {
+        "tags": [
+          "Gym Management Trainee Controller"
+        ],
+        "summary": "Update the list of trainers assigned to a trainee",
+        "operationId": "updateTraineeTrainers",
+        "parameters": [
+          {
+            "name": "username",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateTraineeTrainersRequestDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UserSummaryResponseDTO"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer Authentication": [
+
+            ]
+          }
+        ]
+      }
+    },
+    "/api/v1/auth/change-password": {
+      "put": {
+        "tags": [
+          "Gym Management Authentication Controller"
+        ],
+        "summary": "Change the password of the current user",
+        "operationId": "changePassword",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChangePasswordRequestDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/MessageResponseDTO"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer Authentication": [
+
+            ]
+          }
+        ]
+      }
+    },
+    "/api/v1/users/create": {
+      "post": {
+        "tags": [
+          "Gym Management User Profile Controller"
+        ],
+        "summary": "Create a new user profile",
+        "operationId": "createUser",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProfileRequestDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserSummaryResponseDTO"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer Authentication": [
+
+            ]
+          }
+        ]
+      }
+    },
+    "/api/v1/trainings/add": {
+      "post": {
+        "tags": [
+          "Gym Management Training Controller"
+        ],
+        "summary": "Add a new training session",
+        "operationId": "addTraining",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddTrainingRequestDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/MessageResponseDTO"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer Authentication": [
+
+            ]
+          }
+        ]
+      }
+    },
+    "/api/v1/trainings": {
+      "post": {
+        "tags": [
+          "Gym Management Training Controller"
+        ],
+        "summary": "Add a new training session",
+        "operationId": "addTraining_1",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddTrainingRequestDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/MessageResponseDTO"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer Authentication": [
+
+            ]
+          }
+        ]
+      }
+    },
+    "/api/v1/trainers/register": {
+      "post": {
+        "tags": [
+          "Gym Management Trainer Controller"
+        ],
+        "summary": "Register a new trainer",
+        "operationId": "registerTrainer",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TrainerRegistrationRequestDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponseDTO"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer Authentication": [
+
+            ]
+          }
+        ]
+      }
+    },
+    "/api/v1/trainees/register": {
+      "post": {
+        "tags": [
+          "Gym Management Trainee Controller"
+        ],
+        "summary": "Register a new trainee",
+        "operationId": "registerTrainee",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TraineeRegistrationRequestDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponseDTO"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer Authentication": [
+
+            ]
+          }
+        ]
+      }
+    },
+    "/api/v1/auth/sign-out": {
+      "post": {
+        "tags": [
+          "Gym Management Authentication Controller"
+        ],
+        "summary": "Sign out the current user and invalidate the JWT token",
+        "operationId": "signOut",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/MessageResponseDTO"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/register": {
+      "post": {
+        "tags": [
+          "Gym Management Authentication Controller"
+        ],
+        "summary": "Register a new user and send an email confirmation code",
+        "operationId": "register",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterRequestDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponseDTO"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/login": {
+      "post": {
+        "tags": [
+          "Gym Management Authentication Controller"
+        ],
+        "summary": "Authenticate a user and return a JWT token",
+        "operationId": "login",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequestDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponseDTO"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/confirmation": {
+      "post": {
+        "tags": [
+          "Gym Management Authentication Controller"
+        ],
+        "summary": "Confirm email with a code and return a JWT token",
+        "operationId": "confirm",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConfirmRequestDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponseDTO"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/confirmation/resend": {
+      "post": {
+        "tags": [
+          "Gym Management Authentication Controller"
+        ],
+        "summary": "Resend an email confirmation code",
+        "operationId": "resendConfirmationCode",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResendConfirmationRequestDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponseDTO"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/register": {
+      "post": {
+        "tags": [
+          "Gym Management Administration Controller"
+        ],
+        "summary": "Register a new admin",
+        "operationId": "registerAdmin",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminRegistrationRequestDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/MessageResponseDTO"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer Authentication": [
+
+            ]
+          }
+        ]
+      }
+    },
+    "/api/v1/trainers/{username}/deactivate": {
+      "patch": {
+        "tags": [
+          "Gym Management Trainer Controller"
+        ],
+        "summary": "Deactivate a trainer profile by username",
+        "operationId": "deactivateTrainerProfile",
+        "parameters": [
+          {
+            "name": "username",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/MessageResponseDTO"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer Authentication": [
+
+            ]
+          }
+        ]
+      }
+    },
+    "/api/v1/trainers/{username}/activate": {
+      "patch": {
+        "tags": [
+          "Gym Management Trainer Controller"
+        ],
+        "summary": "Activate a trainer profile by username",
+        "operationId": "activateTrainerProfile",
+        "parameters": [
+          {
+            "name": "username",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/MessageResponseDTO"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer Authentication": [
+
+            ]
+          }
+        ]
+      }
+    },
+    "/api/v1/trainees/{username}/deactivate": {
+      "patch": {
+        "tags": [
+          "Gym Management Trainee Controller"
+        ],
+        "summary": "Deactivate a trainee profile by username",
+        "operationId": "deactivateTraineeProfile",
+        "parameters": [
+          {
+            "name": "username",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/MessageResponseDTO"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer Authentication": [
+
+            ]
+          }
+        ]
+      }
+    },
+    "/api/v1/trainees/{username}/activate": {
+      "patch": {
+        "tags": [
+          "Gym Management Trainee Controller"
+        ],
+        "summary": "Activate a trainee profile by username",
+        "operationId": "activateTraineeProfile",
+        "parameters": [
+          {
+            "name": "username",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/MessageResponseDTO"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer Authentication": [
+
+            ]
+          }
+        ]
+      }
+    },
+    "/api/v1/users/{userId}/profile": {
+      "get": {
+        "tags": [
+          "Gym Management User Profile Controller"
+        ],
+        "summary": "Get user profile by user ID",
+        "operationId": "getUserProfile",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserProfileResponseDTO"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer Authentication": [
+
+            ]
+          }
+        ]
+      }
+    },
+    "/api/v1/users/summary": {
+      "get": {
+        "tags": [
+          "Gym Management User Profile Controller"
+        ],
+        "summary": "Get user by user ID",
+        "operationId": "getUserById",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserSummaryResponseDTO"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer Authentication": [
+
+            ]
+          }
+        ]
+      }
+    },
+    "/api/v1/users/profiles": {
+      "get": {
+        "tags": [
+          "Gym Management User Profile Controller"
+        ],
+        "summary": "Get all user profiles",
+        "operationId": "getAllUserProfiles",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UserProfileResponseDTO"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer Authentication": [
+
+            ]
+          }
+        ]
+      }
+    },
+    "/api/v1/users/all": {
+      "get": {
+        "tags": [
+          "Gym Management User Profile Controller"
+        ],
+        "summary": "Get all users",
+        "operationId": "getAllUsers",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UserSummaryResponseDTO"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer Authentication": [
+
+            ]
+          }
+        ]
+      }
+    },
+    "/api/v1/trainings/types": {
+      "get": {
+        "tags": [
+          "Gym Management Training Controller"
+        ],
+        "summary": "Get training type information based on the provided training type name",
+        "operationId": "getTrainingType",
+        "parameters": [
+          {
+            "name": "trainingType",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TrainingTypeResponseDTO"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer Authentication": [
+
+            ]
+          }
+        ]
+      }
+    },
+    "/api/v1/trainings/trainer/{username}": {
+      "get": {
+        "tags": [
+          "Gym Management Training Controller"
+        ],
+        "summary": "Get training sessions for a trainer based on various filters",
+        "operationId": "getTrainerTrainings",
+        "parameters": [
+          {
+            "name": "username",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "periodFrom",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "periodTo",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "traineeName",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TrainingResponseDTO"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer Authentication": [
+
+            ]
+          }
+        ]
+      }
+    },
+    "/api/v1/trainings/trainee/{username}": {
+      "get": {
+        "tags": [
+          "Gym Management Training Controller"
+        ],
+        "summary": "Get training sessions for a trainee based on various filters",
+        "operationId": "getTraineeTrainings",
+        "parameters": [
+          {
+            "name": "username",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "periodFrom",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "periodTo",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "trainerName",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "trainingType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TrainingResponseDTO"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer Authentication": [
+
+            ]
+          }
+        ]
+      }
+    },
+    "/api/v1/trainers/training-types": {
+      "get": {
+        "tags": [
+          "Gym Management Trainer Controller"
+        ],
+        "summary": "Get all available training types",
+        "operationId": "getTrainingTypes",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TrainingTypeResponseDTO"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer Authentication": [
+
+            ]
+          }
+        ]
+      }
+    },
+    "/api/v1/trainers/profile/{username}": {
+      "get": {
+        "tags": [
+          "Gym Management Trainer Controller"
+        ],
+        "summary": "Get a trainer profile by username",
+        "operationId": "getTrainerProfile",
+        "parameters": [
+          {
+            "name": "username",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserProfileResponseDTO"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer Authentication": [
+
+            ]
+          }
+        ]
+      }
+    },
+    "/api/v1/trainees/{username}/not-assigned-trainers": {
+      "get": {
+        "tags": [
+          "Gym Management Trainee Controller"
+        ],
+        "summary": "Get a list of active trainers not assigned to the trainee",
+        "operationId": "getNotAssignedActiveTrainers",
+        "parameters": [
+          {
+            "name": "username",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UserSummaryResponseDTO"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer Authentication": [
+
+            ]
+          }
+        ]
+      }
+    },
+    "/api/v1/trainees/profile/{username}": {
+      "get": {
+        "tags": [
+          "Gym Management Trainee Controller"
+        ],
+        "summary": "Get a trainee profile by username",
+        "operationId": "getTraineeProfile",
+        "parameters": [
+          {
+            "name": "username",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserProfileResponseDTO"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer Authentication": [
+
+            ]
+          }
+        ]
+      }
+    },
+    "/api/v1/auth/me": {
+      "get": {
+        "tags": [
+          "Gym Management Authentication Controller"
+        ],
+        "summary": "Get information about the current authenticated user",
+        "operationId": "currentSession",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponseDTO"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer Authentication": [
+
+            ]
+          }
+        ]
+      }
+    },
+    "/api/v1/admin/dashboard": {
+      "get": {
+        "tags": [
+          "Gym Management Administration Controller"
+        ],
+        "summary": "Get admin dashboard data",
+        "operationId": "dashboard",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminDashboardResponseDTO"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer Authentication": [
+
+            ]
+          }
+        ]
+      }
+    },
+    "/api/v1/users/delete/{userId}": {
+      "delete": {
+        "tags": [
+          "Gym Management User Profile Controller"
+        ],
+        "summary": "Delete user by user ID",
+        "operationId": "deleteUser",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer Authentication": [
+
+            ]
+          }
+        ]
+      }
+    },
+    "/api/v1/trainings/{trainingId}": {
+      "delete": {
+        "tags": [
+          "Gym Management Training Controller"
+        ],
+        "summary": "Cancel a planned training session",
+        "operationId": "deleteTraining",
+        "parameters": [
+          {
+            "name": "trainingId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/MessageResponseDTO"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer Authentication": [
+
+            ]
+          }
+        ]
+      }
+    },
+    "/api/v1/trainees/delete/{username}": {
+      "delete": {
+        "tags": [
+          "Gym Management Trainee Controller"
+        ],
+        "summary": "Delete a trainee profile by username",
+        "operationId": "deleteTraineeProfile",
+        "parameters": [
+          {
+            "name": "username",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/MessageResponseDTO"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer Authentication": [
+
+            ]
+          }
+        ]
+      }
+    },
+    "/api/v1/trainer-workloads/{trainerUsername}": {
+      "get": {
+        "tags": [
+          "Trainer Workload Aggregation Controller"
+        ],
+        "summary": "Get all yearly and monthly workload summaries for a trainer",
+        "operationId": "getTrainerWorkload",
+        "parameters": [
+          {
+            "name": "trainerUsername",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TrainerWorkloadResponseDTO"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer Authentication": [
+
+            ]
+          }
+        ]
+      }
+    },
+    "/api/v1/trainer-workloads/{trainerUsername}/monthly": {
+      "get": {
+        "tags": [
+          "Trainer Workload Aggregation Controller"
+        ],
+        "summary": "Get one monthly workload summary for a trainer",
+        "operationId": "getTrainerMonthlyWorkload",
+        "parameters": [
+          {
+            "name": "trainerUsername",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "year",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 2000
+            }
+          },
+          {
+            "name": "month",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "maximum": 12,
+              "minimum": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "integer",
+                    "format": "int32"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer Authentication": [
+
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "UserProfileResponseDTO": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "username": {
+            "type": "string"
+          },
+          "firstName": {
+            "type": "string"
+          },
+          "lastName": {
+            "type": "string"
+          },
+          "dateOfBirth": {
+            "type": "string",
+            "format": "date"
+          },
+          "address": {
+            "type": "string"
+          },
+          "specialization": {
+            "type": "string"
+          },
+          "profileStatus": {
+            "type": "string",
+            "enum": [
+              "Active",
+              "Inactive",
+              "Suspended",
+              "Pending",
+              "Deleted"
+            ]
+          },
+          "trainers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UserSummaryResponseDTO"
+            }
+          },
+          "trainees": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UserSummaryResponseDTO"
+            }
+          }
+        }
+      },
+      "UserSummaryResponseDTO": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "username": {
+            "type": "string"
+          },
+          "firstName": {
+            "type": "string"
+          },
+          "lastName": {
+            "type": "string"
+          },
+          "specialization": {
+            "type": "string"
+          },
+          "active": {
+            "type": "boolean"
+          },
+          "profileStatus": {
+            "type": "string",
+            "enum": [
+              "Active",
+              "Inactive",
+              "Suspended",
+              "Pending",
+              "Deleted"
+            ]
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "Admin",
+              "Trainee",
+              "Trainer"
+            ]
+          }
+        }
+      },
+      "UpdateTrainerProfileRequestDTO": {
+        "type": "object",
+        "properties": {
+          "firstName": {
+            "type": "string",
+            "minLength": 1
+          },
+          "lastName": {
+            "type": "string",
+            "minLength": 1
+          },
+          "isActive": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "firstName",
+          "isActive",
+          "lastName"
+        ]
+      },
+      "UpdateTraineeProfileRequestDTO": {
+        "type": "object",
+        "properties": {
+          "firstName": {
+            "type": "string",
+            "minLength": 1
+          },
+          "lastName": {
+            "type": "string",
+            "minLength": 1
+          },
+          "dateOfBirth": {
+            "type": "string",
+            "format": "date"
+          },
+          "address": {
+            "type": "string",
+            "minLength": 1
+          },
+          "isActive": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "address",
+          "dateOfBirth",
+          "firstName",
+          "isActive",
+          "lastName"
+        ]
+      },
+      "UpdateTraineeTrainersRequestDTO": {
+        "type": "object",
+        "properties": {
+          "trainers": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 1
+          }
+        },
+        "required": [
+          "trainers"
+        ]
+      },
+      "ChangePasswordRequestDTO": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "minLength": 1
+          },
+          "username": {
+            "type": "string",
+            "minLength": 1
+          },
+          "oldPassword": {
+            "type": "string",
+            "minLength": 1
+          },
+          "newPassword": {
+            "type": "string",
+            "maxLength": 2147483647,
+            "minLength": 8
+          }
+        },
+        "required": [
+          "email",
+          "newPassword",
+          "oldPassword",
+          "username"
+        ]
+      },
+      "MessageResponseDTO": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "ProfileRequestDTO": {
+        "type": "object",
+        "properties": {
+          "role": {
+            "type": "string",
+            "enum": [
+              "Admin",
+              "Trainee",
+              "Trainer"
+            ]
+          },
+          "firstName": {
+            "type": "string",
+            "minLength": 1
+          },
+          "lastName": {
+            "type": "string",
+            "minLength": 1
+          },
+          "specialization": {
+            "type": "string",
+            "enum": [
+              "Fitness",
+              "Yoga",
+              "Zumba",
+              "Stretching",
+              "Resistance",
+              "Set Later"
+            ]
+          },
+          "dateOfBirth": {
+            "type": "string",
+            "format": "date"
+          },
+          "address": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "address",
+          "dateOfBirth",
+          "firstName",
+          "lastName",
+          "role"
+        ]
+      },
+      "AddTrainingRequestDTO": {
+        "type": "object",
+        "properties": {
+          "traineeUsername": {
+            "type": "string",
+            "minLength": 1
+          },
+          "trainerUsername": {
+            "type": "string",
+            "minLength": 1
+          },
+          "trainingName": {
+            "type": "string",
+            "minLength": 1
+          },
+          "trainingDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "trainingType": {
+            "type": "string",
+            "minLength": 1
+          },
+          "trainingDuration": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 1
+          }
+        },
+        "required": [
+          "traineeUsername",
+          "trainerUsername",
+          "trainingDate",
+          "trainingDuration",
+          "trainingName",
+          "trainingType"
+        ]
+      },
+      "TrainerRegistrationRequestDTO": {
+        "type": "object",
+        "properties": {
+          "firstName": {
+            "type": "string",
+            "minLength": 1
+          },
+          "lastName": {
+            "type": "string",
+            "minLength": 1
+          },
+          "specialization": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "firstName",
+          "lastName",
+          "specialization"
+        ]
+      },
+      "AuthResponseDTO": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "token": {
+            "type": "string"
+          },
+          "tokenType": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string"
+          }
+        }
+      },
+      "TraineeRegistrationRequestDTO": {
+        "type": "object",
+        "properties": {
+          "firstName": {
+            "type": "string",
+            "minLength": 1
+          },
+          "lastName": {
+            "type": "string",
+            "minLength": 1
+          },
+          "dateOfBirth": {
+            "type": "string",
+            "format": "date"
+          },
+          "address": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "firstName",
+          "lastName"
+        ]
+      },
+      "RegisterRequestDTO": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "minLength": 1
+          },
+          "password": {
+            "type": "string",
+            "minLength": 1
+          },
+          "passConfirm": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "email",
+          "password"
+        ]
+      },
+      "LoginRequestDTO": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string"
+          },
+          "username": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "password"
+        ]
+      },
+      "ConfirmRequestDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "minLength": 1
+          },
+          "confirmation": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "confirmation",
+          "email"
+        ]
+      },
+      "ResendConfirmationRequestDTO": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "email"
+        ]
+      },
+      "AdminRegistrationRequestDTO": {
+        "type": "object",
+        "properties": {
+          "firstName": {
+            "type": "string",
+            "minLength": 1
+          },
+          "lastName": {
+            "type": "string",
+            "minLength": 1
+          },
+          "username": {
+            "type": "string",
+            "minLength": 1
+          },
+          "password": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "firstName",
+          "lastName",
+          "username"
+        ]
+      },
+      "TrainingTypeResponseDTO": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "trainingType": {
+            "type": "string"
+          }
+        }
+      },
+      "TrainingResponseDTO": {
+        "type": "object",
+        "properties": {
+          "trainingId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "trainingName": {
+            "type": "string"
+          },
+          "trainingDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "trainingType": {
+            "type": "string"
+          },
+          "trainingDuration": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "trainerName": {
+            "type": "string"
+          },
+          "traineeName": {
+            "type": "string"
+          }
+        }
+      },
+      "AdminDashboardResponseDTO": {
+        "type": "object",
+        "properties": {
+          "totalUsers": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "activeUsers": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "inactiveUsers": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "admins": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "trainees": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "trainers": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "trainings": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "users": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UserSummaryResponseDTO"
+            }
+          }
+        }
+      },
+      "MonthSummaryDTO": {
+        "type": "object",
+        "properties": {
+          "month": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "trainingSummaryDuration": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "TrainerWorkloadResponseDTO": {
+        "type": "object",
+        "properties": {
+          "trainerUsername": {
+            "type": "string"
+          },
+          "trainerFirstName": {
+            "type": "string"
+          },
+          "trainerLastName": {
+            "type": "string"
+          },
+          "trainerStatus": {
+            "type": "boolean"
+          },
+          "years": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/YearSummaryDTO"
+            }
+          }
+        }
+      },
+      "YearSummaryDTO": {
+        "type": "object",
+        "properties": {
+          "year": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "months": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MonthSummaryDTO"
+            }
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "Bearer Authentication": {
+        "type": "http",
+        "description": "Service JWT issued with the shared deployment secret",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  }
+}

@@ -19,7 +19,7 @@ import java.util.UUID;
 @RequestMapping("/api/v1/users")
 @RequiredArgsConstructor
 @Tag(
-        name = "User Controller",
+        name = "Gym Management User Profile Controller",
         description = "Endpoints for managing user profile operations"
 )
 public class UserController {

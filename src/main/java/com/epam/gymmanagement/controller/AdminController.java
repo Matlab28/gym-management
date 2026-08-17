@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/v1/admin")
 @SecurityRequirement(name = "Bearer Authentication")
 @Tag(
-        name = "Admin Controller",
+        name = "Gym Management Administration Controller",
         description = "Registering new admins and providing admin dashboard data"
 )
 public class AdminController {

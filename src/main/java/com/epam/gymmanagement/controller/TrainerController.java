@@ -23,7 +23,7 @@ import java.util.List;
 @RequestMapping("/api/v1/trainers")
 @SecurityRequirement(name = "Bearer Authentication")
 @Tag(
-        name = "Trainer Controller",
+        name = "Gym Management Trainer Controller",
         description = "Endpoints for managing trainer profiles, including registration, profile updates, and activation/deactivation"
 )
 public class TrainerController {

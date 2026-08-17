@@ -1,4 +1,20 @@
 services:
+  activemq:
+    image: apache/activemq:6.2.8
+    container_name: gym-management-activemq
+    restart: unless-stopped
+    environment:
+      ACTIVEMQ_CONNECTION_USER: ${ACTIVEMQ_USER:-admin}
+      ACTIVEMQ_CONNECTION_PASSWORD: ${ACTIVEMQ_PASSWORD:-admin}
+      ACTIVEMQ_WEB_USER: ${ACTIVEMQ_WEB_USER:-admin}
+      ACTIVEMQ_WEB_PASSWORD: ${ACTIVEMQ_WEB_PASSWORD:-admin}
+      ACTIVEMQ_OPTS_MEMORY: -Xms64M -Xmx256M
+    ports:
+      - "61616:61616"
+      - "8161:8161"
+    volumes:
+      - activemq-data:/opt/activemq/data
+
   postgres:
     image: postgres:latest
     container_name: gym-management-postgres
@@ -38,3 +54,6 @@ services:
       - 'GF_LOG_FILTERS=alerting=debug,auth=debug,backend=debug,datasource=debug,db=debug,plugins=debug,rendering=debug,server=debug,sqlstore=debug,utils=debug'
     depends_on:
       - Prometheus
+
+volumes:
+  activemq-data:

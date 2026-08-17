@@ -2,6 +2,7 @@ package com.epam.gymmanagement.service;
 
 import com.epam.gymmanagement.constant.TrainingType;
 import com.epam.gymmanagement.constant.UserRole;
+import com.epam.gymmanagement.constant.WorkloadActionType;
 import com.epam.gymmanagement.dto.request.AddTrainingRequestDTO;
 import com.epam.gymmanagement.dto.request.TrainingSearchRequestDTO;
 import com.epam.gymmanagement.dto.response.MessageResponseDTO;
@@ -48,6 +49,8 @@ class TrainingServiceTest {
     private GymMapper gymMapper;
     @Mock
     private SecurityService securityService;
+    @Mock
+    private TrainerWorkloadIntegrationService workloadIntegrationService;
 
     @InjectMocks
     private TrainingService trainingService;
@@ -79,6 +82,63 @@ class TrainingServiceTest {
         assertEquals(45, savedTraining.getTrainingDuration());
         verify(securityService).requireRole(UserRole.ADMIN, UserRole.TRAINER);
         verify(securityService, never()).currentUsername();
+        verify(workloadIntegrationService).updateWorkload(savedTraining, WorkloadActionType.ADD);
+    }
+
+    @Test
+    void deleteTrainingCancelsFutureTrainingAndUpdatesWorkloadForAdmin() {
+        TrainingEntity training = ServiceTestFixtures.training(
+                "Yoga Basics",
+                ServiceTestFixtures.trainee("trainee.user", true),
+                ServiceTestFixtures.trainer("trainer.user", true, TrainingType.YOGA),
+                TrainingType.YOGA
+        );
+        training.setTrainingDate(LocalDate.now().plusDays(1));
+        when(securityService.hasRole(UserRole.ADMIN)).thenReturn(true);
+        when(trainingRepository.findById(training.getId())).thenReturn(Optional.of(training));
+
+        MessageResponseDTO response = trainingService.deleteTraining(training.getId());
+
+        assertEquals("Training deleted successfully", response.getMessage());
+        verify(trainingRepository).delete(training);
+        verify(workloadIntegrationService).updateWorkload(training, WorkloadActionType.DELETE);
+    }
+
+    @Test
+    void deleteTrainingRejectsPastTraining() {
+        TrainingEntity training = ServiceTestFixtures.training(
+                "Yoga Basics",
+                ServiceTestFixtures.trainee("trainee.user", true),
+                ServiceTestFixtures.trainer("trainer.user", true, TrainingType.YOGA),
+                TrainingType.YOGA
+        );
+        training.setTrainingDate(LocalDate.now().minusDays(1));
+        when(securityService.hasRole(UserRole.ADMIN)).thenReturn(true);
+        when(trainingRepository.findById(training.getId())).thenReturn(Optional.of(training));
+
+        assertThrows(BadRequestException.class, () -> trainingService.deleteTraining(training.getId()));
+
+        verify(trainingRepository, never()).delete(any());
+        verifyNoInteractions(workloadIntegrationService);
+    }
+
+    @Test
+    void deleteTrainingDeniesDifferentTrainer() {
+        TrainingEntity training = ServiceTestFixtures.training(
+                "Yoga Basics",
+                ServiceTestFixtures.trainee("trainee.user", true),
+                ServiceTestFixtures.trainer("trainer.user", true, TrainingType.YOGA),
+                TrainingType.YOGA
+        );
+        training.setTrainingDate(LocalDate.now().plusDays(1));
+        when(securityService.hasRole(UserRole.ADMIN)).thenReturn(false);
+        when(securityService.currentUsername()).thenReturn("other.trainer");
+        when(trainingRepository.findById(training.getId())).thenReturn(Optional.of(training));
+
+        assertThrows(AccessDeniedException.class, () -> trainingService.deleteTraining(training.getId()));
+
+        verify(trainingRepository, never()).delete(any());
+        verifyNoInteractions(workloadIntegrationService);
     }
 
     @Test

@@ -1,0 +1,123 @@
+openapi: 3.1.0
+info:
+  title: Trainer Workload Backend API
+  description: |
+    Read API for trainer workload aggregated by year and month. Gym Management
+    publishes ADD and DELETE workload events asynchronously through ActiveMQ.
+  contact:
+    name: Trainer Workload API Team
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
+  version: 1.0.0
+servers:
+- url: http://ec2-13-40-64-222.eu-west-2.compute.amazonaws.com/workload
+  description: Trainer Workload microservice
+- url: http://ec2-13-40-64-222.eu-west-2.compute.amazonaws.com
+  description: Gym Management microservice
+tags:
+- name: Trainer Workload Aggregation Controller
+  description: Manage and retrieve yearly and monthly trainer workload summaries
+paths:
+  /api/v1/trainer-workloads/{trainerUsername}:
+    get:
+      tags:
+      - Trainer Workload Aggregation Controller
+      summary: Get all yearly and monthly workload summaries for a trainer
+      operationId: getTrainerWorkload
+      parameters:
+      - name: trainerUsername
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/TrainerWorkloadResponseDTO"
+      security:
+      - Bearer Authentication: []
+  /api/v1/trainer-workloads/{trainerUsername}/monthly:
+    get:
+      tags:
+      - Trainer Workload Aggregation Controller
+      summary: Get one monthly workload summary for a trainer
+      operationId: getTrainerMonthlyWorkload
+      parameters:
+      - name: trainerUsername
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: year
+        in: query
+        required: true
+        schema:
+          type: integer
+          format: int32
+          minimum: 2000
+      - name: month
+        in: query
+        required: true
+        schema:
+          type: integer
+          format: int32
+          maximum: 12
+          minimum: 1
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: integer
+                  format: int32
+      security:
+      - Bearer Authentication: []
+components:
+  schemas:
+    MonthSummaryDTO:
+      type: object
+      properties:
+        month:
+          type: integer
+          format: int32
+        trainingSummaryDuration:
+          type: integer
+          format: int32
+    TrainerWorkloadResponseDTO:
+      type: object
+      properties:
+        trainerUsername:
+          type: string
+        trainerFirstName:
+          type: string
+        trainerLastName:
+          type: string
+        trainerStatus:
+          type: boolean
+        years:
+          type: array
+          items:
+            $ref: "#/components/schemas/YearSummaryDTO"
+    YearSummaryDTO:
+      type: object
+      properties:
+        year:
+          type: integer
+          format: int32
+        months:
+          type: array
+          items:
+            $ref: "#/components/schemas/MonthSummaryDTO"
+  securitySchemes:
+    Bearer Authentication:
+      type: http
+      description: Service JWT issued with the shared deployment secret
+      scheme: bearer
+      bearerFormat: JWT

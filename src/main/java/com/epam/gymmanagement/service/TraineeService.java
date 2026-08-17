@@ -19,6 +19,7 @@ import com.epam.gymmanagement.repository.TraineeRepository;
 import com.epam.gymmanagement.repository.TrainerRepository;
 import com.epam.gymmanagement.repository.UserRepository;
 import com.epam.gymmanagement.security.SecurityService;
+import com.epam.gymmanagement.security.UserSessionService;
 import com.epam.gymmanagement.util.PasswordGenerator;
 import com.epam.gymmanagement.util.UsernameGenerator;
 import lombok.RequiredArgsConstructor;
@@ -45,6 +46,7 @@ public class TraineeService {
     private final SecurityService securityService;
     private final ModelMapper modelMapper;
     private final TraineeMetrics traineeMetrics;
+    private final UserSessionService userSessionService;
 
     @Transactional
     public AuthResponseDTO registerTrainee(TraineeRegistrationRequestDTO request) {
@@ -120,6 +122,7 @@ public class TraineeService {
 
         trainee.getTrainers().clear();
         traineeRepository.delete(trainee);
+        userSessionService.deleteAllForUser(user);
         userRepository.delete(user);
 
         traineeMetrics.getTraineeDeletedCounter().increment();

@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/auth")
 @Tag(
-        name = "Auth Controller",
+        name = "Gym Management Authentication Controller",
         description = "Endpoints for user authentication and session management"
 )
 public class AuthController {

@@ -1,0 +1,26 @@
+spring:
+  application:
+    name: discovery-server
+  output:
+    ansi:
+      enabled: always
+
+server:
+  port: ${EUREKA_PORT:8761}
+
+eureka:
+  client:
+    register-with-eureka: false
+    fetch-registry: false
+  server:
+    enable-self-preservation: false
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+logging:
+  pattern:
+    console: "%clr(%d{yyyy-MM-dd HH:mm:ss}){faint} %clr([%thread]){magenta} %clr(%-5level) %clr([discovery]){cyan} %clr(%logger{36}){blue} %clr(-){faint} %msg%n"

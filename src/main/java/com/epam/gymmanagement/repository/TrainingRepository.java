@@ -20,7 +20,7 @@ public interface TrainingRepository extends JpaRepository<TrainingEntity, UUID> 
             AND (:periodTo IS NULL OR t.trainingDate <= :periodTo)
             AND (:trainerName IS NULL OR
                  LOWER(CONCAT(t.trainer.userEntity.firstName, ' ', t.trainer.userEntity.lastName))
-                 LIKE LOWER(CONCAT('%', :trainerName, '%')))
+                 LIKE LOWER(CONCAT('%', CAST(:trainerName AS string), '%')))
             AND (:trainingType IS NULL OR t.trainingType.trainingTypeName = :trainingType)
             ORDER BY t.trainingDate DESC
             """)
@@ -39,7 +39,7 @@ public interface TrainingRepository extends JpaRepository<TrainingEntity, UUID> 
             AND (:periodTo IS NULL OR t.trainingDate <= :periodTo)
             AND (:traineeName IS NULL OR
                  LOWER(CONCAT(t.trainee.userEntity.firstName, ' ', t.trainee.userEntity.lastName))
-                 LIKE LOWER(CONCAT('%', :traineeName, '%')))
+                 LIKE LOWER(CONCAT('%', CAST(:traineeName AS string), '%')))
             ORDER BY t.trainingDate DESC
             """)
     List<TrainingEntity> findTrainerTrainings(

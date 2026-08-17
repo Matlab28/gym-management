@@ -1,15 +1,8 @@
 spring:
-  datasource:
-    url: ${LOCAL_DB_URL:jdbc:h2:mem:gym;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE}
-    driver-class-name: org.h2.Driver
-    username: ${LOCAL_DB_USERNAME:sa}
-    password: ${LOCAL_DB_PASSWORD:}
-  jpa:
-    hibernate:
-      ddl-auto: create-drop
-  h2:
-    console:
-      enabled: true
-      settings:
-        trace: false
-        web-allow-others: ${H2_CONSOLE_WEB_ALLOW_OTHERS:false}
+  config:
+    activate:
+      on-profile: local
+  activemq:
+    broker-url: ${ACTIVEMQ_BROKER_URL:tcp://localhost:61616}
+    user: ${ACTIVEMQ_USER:admin}
+    password: ${ACTIVEMQ_PASSWORD:admin}

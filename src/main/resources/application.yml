@@ -17,7 +17,6 @@ spring:
     properties:
       hibernate:
         format_sql: true
-        dialect: org.hibernate.dialect.PostgreSQLDialect
   datasource:
     url: jdbc:postgresql://localhost:5432/gym_management
     username: postgres
@@ -27,6 +26,10 @@ spring:
     store-type: jdbc
     jdbc:
       initialize-schema: never
+  jms:
+    pub-sub-domain: false
+    template:
+      delivery-mode: persistent
   h2:
     console:
       enabled: false
@@ -47,9 +50,9 @@ spring:
   mail:
     host: ${MAIL_HOST:smtp-relay.brevo.com}
     port: ${MAIL_PORT:587}
-    username: ${MAIL_USERNAME:af5770001@smtp-brevo.com}
-    password: ${MAIL_PASSWORD:bskKqlkelbtYYgF}
-    from: ${MAIL_FROM:verifyy.testt@gmail.com}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+    from: ${MAIL_FROM:noreply@example.com}
     properties:
       mail:
         smtp:
@@ -61,6 +64,39 @@ security:
   jwt:
     secret: ${JWT_SECRET:IhOKpzNEWKKpkQXoOLDCVdJ7zSKXtavXbPidtf+kFSETu5r2de7jhjO5ntlUvgc0+ZP2w2y1KIXuCZNNCjtPQw==}
     expiration-ms: ${JWT_EXPIRATION_MS:86400000}
+
+app:
+  messaging:
+    workload-queue: ${WORKLOAD_QUEUE:trainer.workload.events}
+  openapi:
+    gym-server-url: ${OPENAPI_GYM_SERVER_URL:/}
+    workload-server-url: ${OPENAPI_WORKLOAD_SERVER_URL:/workload}
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    urls:
+      - name: Gym Management API
+        url: /v3/api-docs
+      - name: Trainer Workload API
+        url: /workload/v3/api-docs
+    urls-primary-name: Gym Management API
+    custom-css-url: /swagger-ui-custom.css
+    display-request-duration: true
+    doc-expansion: none
+    filter: true
+    operations-sorter: alpha
+    persist-authorization: true
+    tags-sorter: alpha
+    try-it-out-enabled: true
+
+eureka:
+  client:
+    enabled: ${EUREKA_CLIENT_ENABLED:true}
+    service-url:
+      defaultZone: ${EUREKA_DEFAULT_ZONE:http://localhost:8761/eureka/}
 
 management:
   endpoints:

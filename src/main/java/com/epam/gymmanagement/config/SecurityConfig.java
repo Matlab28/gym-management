@@ -26,6 +26,7 @@ public class SecurityConfig {
 
     private static final String[] PUBLIC = {
             "/v3/api-docs/**",
+            "/v3/api-docs.yaml",
             "/v2/api-docs/**",
             "/swagger-resources/**",
             "/configuration/ui",

@@ -1,0 +1,48 @@
+:root {
+    --gym-ink: #17202a;
+    --gym-green: #177a55;
+    --gym-coral: #e45f47;
+    --gym-paper: #f7f9f8;
+}
+
+body {
+    background: var(--gym-paper);
+}
+
+.swagger-ui .topbar {
+    background: var(--gym-ink);
+    border-bottom: 4px solid var(--gym-green);
+    padding: 12px 0;
+}
+
+.swagger-ui .topbar .download-url-wrapper .select-label {
+    color: #ffffff;
+}
+
+.swagger-ui .topbar .download-url-wrapper select {
+    border: 1px solid #a9c8ba;
+    border-radius: 4px;
+    color: var(--gym-ink);
+}
+
+.swagger-ui .info .title {
+    color: var(--gym-ink);
+}
+
+.swagger-ui .info .title small {
+    background: var(--gym-green);
+}
+
+.swagger-ui .btn.authorize {
+    border-color: var(--gym-green);
+    color: var(--gym-green);
+}
+
+.swagger-ui .btn.execute {
+    background: var(--gym-coral);
+    border-color: var(--gym-coral);
+}
+
+.swagger-ui .opblock-tag {
+    border-bottom-color: #d9e2dd;
+}

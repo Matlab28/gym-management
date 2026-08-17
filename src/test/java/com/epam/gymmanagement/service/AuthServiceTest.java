@@ -14,7 +14,9 @@ import com.epam.gymmanagement.exception.BadRequestException;
 import com.epam.gymmanagement.exception.NotFoundException;
 import com.epam.gymmanagement.repository.UserRepository;
 import com.epam.gymmanagement.security.JwtService;
+import com.epam.gymmanagement.security.BruteForceProtectionService;
 import com.epam.gymmanagement.security.SecurityService;
+import com.epam.gymmanagement.security.UserSessionService;
 import com.epam.gymmanagement.security.UserRoleResolver;
 import jakarta.mail.Session;
 import jakarta.mail.internet.MimeMessage;
@@ -56,6 +58,10 @@ class AuthServiceTest {
     private UserRoleResolver userRoleResolver;
     @Mock
     private JavaMailSender javaMailSender;
+    @Mock
+    private UserSessionService userSessionService;
+    @Mock
+    private BruteForceProtectionService bruteForceProtectionService;
 
     @InjectMocks
     private AuthService authService;
@@ -238,7 +244,7 @@ class AuthServiceTest {
 
         MessageResponseDTO response = authService.changePassword(request);
 
-        assertEquals("Password changed successfully", response.getMessage());
+        assertEquals("Password changed successfully. Please log in again.", response.getMessage());
         assertEquals("encoded-new", user.getPassword());
         verify(securityService).requireSameUserOrAdmin("trainee.user");
         verify(userRepository).save(user);
@@ -284,7 +290,7 @@ class AuthServiceTest {
     }
 
     @Test
-    void confirmActivatesUserAndReturnsEmailSubjectJwt() {
+    void confirmActivatesUserAndRequiresLogin() {
         ConfirmRequestDto request = confirmRequest("Pending.User@Gmail.com", "123456");
         UserEntity user = ServiceTestFixtures.user("pending.user", UserRole.TRAINEE, false);
         user.setEmail("pending.user@gmail.com");
@@ -295,13 +301,11 @@ class AuthServiceTest {
 
         when(userRepository.findByEmailIgnoreCase("pending.user@gmail.com")).thenReturn(Optional.of(user));
         when(passwordEncoder.matches("123456", "encoded-code")).thenReturn(true);
-        when(jwtService.generateToken("pending.user@gmail.com")).thenReturn("jwt-token");
-
         AuthResponseDTO response = authService.confirm(request);
 
-        assertEquals("Email confirmed successfully! Thank you for your registration.", response.getMessage());
-        assertEquals("jwt-token", response.getToken());
-        assertEquals("Bearer", response.getTokenType());
+        assertEquals("Email confirmed successfully. Please log in.", response.getMessage());
+        assertNull(response.getToken());
+        assertNull(response.getTokenType());
         assertNull(response.getRole());
         assertTrue(user.getIsActive());
         assertEquals(com.epam.gymmanagement.constant.ProfileStatus.ACTIVE, user.getProfileStatus());

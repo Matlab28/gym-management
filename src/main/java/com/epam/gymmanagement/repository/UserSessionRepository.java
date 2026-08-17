@@ -16,4 +16,6 @@ public interface UserSessionRepository extends JpaRepository<UserSessionEntity, 
     List<UserSessionEntity> findAllByUserAndActiveTrue(UserEntity user);
 
     boolean existsByTokenAndActiveTrue(String token);
+
+    void deleteAllByUser(UserEntity user);
 }

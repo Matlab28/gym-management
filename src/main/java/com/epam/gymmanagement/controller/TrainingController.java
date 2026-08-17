@@ -18,25 +18,32 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/trainings")
 @RequiredArgsConstructor
 @SecurityRequirement(name = "Bearer Authentication")
 @Tag(
-        name = "Training Controller",
+        name = "Gym Management Training Controller",
         description = "Endpoints for managing training sessions, including adding new trainings and retrieving trainings for trainees and trainers"
 )
 public class TrainingController {
     private final TrainingService trainingService;
 
-    @PostMapping("/add")
+    @PostMapping({"", "/add"})
     @Operation(summary = "Add a new training session")
     public ResponseEntity<MessageResponseDTO> addTraining(
             @Valid @RequestBody AddTrainingRequestDTO request
     ) {
         MessageResponseDTO response = trainingService.addTraining(request);
         return ResponseEntity.ok(response);
+    }
+
+    @DeleteMapping("/{trainingId}")
+    @Operation(summary = "Cancel a planned training session")
+    public ResponseEntity<MessageResponseDTO> deleteTraining(@PathVariable UUID trainingId) {
+        return ResponseEntity.ok(trainingService.deleteTraining(trainingId));
     }
 
     @GetMapping("/trainee/{username}")

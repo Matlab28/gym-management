@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Gym Management Backend API documentation">
+    <meta name="color-scheme" content="light">
+    <title>Gym Management Backend API - Swagger UI</title>
+    <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@5.11.0/swagger-ui.css">
+    <style>
+        html {
+            box-sizing: border-box;
+            overflow-y: scroll;
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: inherit;
+        }
+
+        body {
+            margin: 0;
+            background: #fafafa;
+        }
+
+        .opblock.opblock-options {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+<div id="swagger-ui"></div>
+<script src="https://unpkg.com/swagger-ui-dist@5.11.0/swagger-ui-bundle.js" crossorigin="anonymous"></script>
+<script>
+    const services = {
+        gym: {
+            docsUrl: '/v3/api-docs',
+            fallbackUrl: './gym-management.yaml',
+            serverUrl: () => window.location.origin,
+            description: 'Gym Management microservice'
+        },
+        workload: {
+            docsUrl: '/workload/v3/api-docs',
+            fallbackUrl: './trainer-workload.yaml',
+            serverUrl: () => `${window.location.origin}/workload`,
+            description: 'Trainer Workload microservice'
+        }
+    };
+
+    let activeService = 'gym';
+
+    async function fetchServiceSpec(service) {
+        const config = services[service];
+
+        try {
+            const response = await fetch(config.docsUrl, {cache: 'no-store'});
+            if (!response.ok) {
+                throw new Error(`OpenAPI request failed with status ${response.status}`);
+            }
+            return await response.json();
+        } catch (error) {
+            const fallbackResponse = await fetch(config.fallbackUrl, {cache: 'no-store'});
+            if (!fallbackResponse.ok) {
+                throw error;
+            }
+            return await fallbackResponse.text();
+        }
+    }
+
+    async function renderService(service) {
+        activeService = service;
+        const spec = await fetchServiceSpec(service);
+        const selectedServer = services[service];
+        const otherServers = Object.entries(services)
+            .filter(([key]) => key !== service)
+            .map(([, config]) => config);
+        const servers = [selectedServer, ...otherServers].map(config => ({
+            url: config.serverUrl(),
+            description: config.description
+        }));
+
+        const normalizedSpec = typeof spec === 'string'
+            ? spec
+            : {...spec, servers};
+
+        window.ui = SwaggerUIBundle({
+            ...(typeof normalizedSpec === 'string'
+                ? {url: services[service].fallbackUrl}
+                : {spec: normalizedSpec}),
+            dom_id: '#swagger-ui',
+            deepLinking: true,
+            displayRequestDuration: true,
+            persistAuthorization: true
+        });
+    }
+
+    function serviceFromServerUrl(serverUrl) {
+        const pathname = new URL(serverUrl, window.location.origin).pathname;
+        return pathname === '/workload' || pathname.startsWith('/workload/')
+            ? 'workload'
+            : 'gym';
+    }
+
+    document.addEventListener('change', event => {
+        const select = event.target.closest('.servers select');
+        if (!select) {
+            return;
+        }
+
+        const selectedService = serviceFromServerUrl(select.value);
+        if (selectedService !== activeService) {
+            renderService(selectedService);
+        }
+    });
+
+    window.onload = () => renderService(activeService);
+</script>
+</body>
+</html>

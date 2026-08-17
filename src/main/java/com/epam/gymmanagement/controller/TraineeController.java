@@ -24,7 +24,7 @@ import java.util.List;
 @CrossOrigin("https://gym-management-front.vercel.app")
 @SecurityRequirement(name = "Bearer Authentication")
 @Tag(
-        name = "Trainee Controller",
+        name = "Gym Management Trainee Controller",
         description = "Endpoints for managing trainee profiles and their assigned trainers"
 )
 public class TraineeController {

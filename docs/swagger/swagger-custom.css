@@ -1,0 +1,317 @@
+:root {
+    color-scheme: light only;
+    --swagger-ink: #3b4352;
+    --swagger-green: #61d39b;
+    --swagger-green-border: #67d5a0;
+    --swagger-green-wash: #eaf7f1;
+    --swagger-line: #c9d2ce;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    background: #fff !important;
+    color: var(--swagger-ink);
+    margin: 0;
+    min-height: 100%;
+}
+
+.swagger-ui {
+    color: var(--swagger-ink);
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.swagger-ui .topbar {
+    display: none;
+}
+
+.swagger-ui .wrapper {
+    max-width: none;
+    padding: 0 40px;
+}
+
+.swagger-ui .information-container {
+    background: #fbfbfc;
+    padding-top: 1px;
+}
+
+.swagger-ui .info {
+    margin: 54px 0 52px;
+}
+
+.swagger-ui .info .title {
+    color: var(--swagger-ink);
+    font-size: 38px;
+    font-weight: 700;
+    letter-spacing: 0;
+    line-height: 1.2;
+    margin: 0 0 24px;
+}
+
+.swagger-ui .info .title small {
+    background: #858b95;
+    border-radius: 14px;
+    font-size: 13px;
+    padding: 4px 8px;
+    top: -4px;
+}
+
+.swagger-ui .info .title small:last-child {
+    background: #8cc63f;
+}
+
+.swagger-ui .info p,
+.swagger-ui .info li,
+.swagger-ui .info table {
+    color: var(--swagger-ink);
+    font-size: 15px;
+    line-height: 1.5;
+}
+
+.swagger-ui .info a,
+.swagger-ui .info .base-url,
+.swagger-ui .info .link {
+    display: none;
+}
+
+.swagger-ui .scheme-container {
+    background: #fff;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    margin: 0 0 20px;
+    padding: 35px 0;
+}
+
+.swagger-ui .scheme-container .schemes {
+    align-items: flex-end;
+    display: flex;
+    justify-content: space-between;
+}
+
+.swagger-ui .scheme-container .servers {
+    width: min(760px, 62vw);
+}
+
+.swagger-ui .scheme-container .servers-title,
+.swagger-ui .scheme-container label {
+    color: var(--swagger-ink);
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.swagger-ui .scheme-container select {
+    background: #fff;
+    border: 2px solid var(--swagger-ink);
+    border-radius: 4px;
+    color: var(--swagger-ink);
+    font-size: 14px;
+    font-weight: 700;
+    height: 36px;
+    max-width: none;
+    width: 100%;
+}
+
+.swagger-ui .btn.authorize {
+    border: 2px solid var(--swagger-green);
+    border-radius: 4px;
+    color: #55c78f;
+    font-size: 14px;
+    min-width: 155px;
+    padding: 9px 18px;
+}
+
+.swagger-ui .btn.authorize svg {
+    fill: #55c78f;
+}
+
+.swagger-ui .opblock-tag-section {
+    margin: 0 0 22px;
+}
+
+.swagger-ui .opblock-tag {
+    border-bottom: 1px solid var(--swagger-line);
+    color: var(--swagger-ink);
+    font-size: 25px;
+    font-weight: 700;
+    letter-spacing: 0;
+    margin: 0 0 6px;
+    padding: 22px 10px 18px;
+}
+
+.swagger-ui .opblock-tag small {
+    color: var(--swagger-ink);
+    font-size: 14px;
+    font-weight: 400;
+}
+
+.swagger-ui .opblock {
+    border-radius: 4px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.14);
+    margin: 0 0 14px;
+}
+
+.swagger-ui .opblock .opblock-summary {
+    min-height: 47px;
+    padding: 4px 8px;
+}
+
+.swagger-ui .opblock .opblock-summary-method {
+    border-radius: 3px;
+    font-size: 14px;
+    min-width: 86px;
+    padding: 8px 12px;
+    text-shadow: none;
+}
+
+.swagger-ui .opblock .opblock-summary-path {
+    color: var(--swagger-ink);
+    font-size: 17px;
+    font-weight: 700;
+}
+
+.swagger-ui .opblock .opblock-summary-description {
+    color: var(--swagger-ink);
+    font-size: 13px;
+}
+
+.swagger-ui .opblock.opblock-post {
+    background: var(--swagger-green-wash);
+    border-color: var(--swagger-green-border);
+}
+
+.swagger-ui .opblock.opblock-post .opblock-summary {
+    border-color: var(--swagger-green-border);
+}
+
+.swagger-ui .opblock.opblock-post .opblock-summary-method {
+    background: var(--swagger-green);
+}
+
+.swagger-ui .opblock.opblock-get {
+    background: #eef6fc;
+    border-color: #61affe;
+}
+
+.swagger-ui .opblock.opblock-put {
+    background: #fff9e8;
+    border-color: #f2c84b;
+}
+
+.swagger-ui .opblock.opblock-delete {
+    background: #fff0f0;
+    border-color: #f26b6b;
+}
+
+.swagger-ui .opblock .opblock-section-header,
+.swagger-ui .responses-wrapper,
+.swagger-ui .responses-inner,
+.swagger-ui .response,
+.swagger-ui table.responses-table tbody {
+    background: transparent;
+}
+
+.swagger-ui .opblock .opblock-section-header {
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
+    min-height: 58px;
+    padding: 14px 20px;
+}
+
+.swagger-ui input,
+.swagger-ui select,
+.swagger-ui textarea {
+    background: #fff;
+    color: var(--swagger-ink);
+}
+
+.swagger-ui textarea {
+    border: 0;
+    border-radius: 4px;
+    min-height: 280px;
+    padding: 14px;
+}
+
+.swagger-ui .btn.execute {
+    background: #4995df;
+    border-color: #4995df;
+    border-radius: 4px;
+    color: #fff;
+    min-height: 40px;
+}
+
+.swagger-ui .btn.cancel {
+    border-color: #ff6060;
+    color: #ef5757;
+}
+
+.swagger-ui .responses-table td,
+.swagger-ui .responses-table th {
+    color: var(--swagger-ink);
+    font-size: 13px;
+    padding: 13px 10px;
+}
+
+.swagger-ui .responses-table .response-col_description {
+    font-size: 15px;
+}
+
+.swagger-ui .opblock pre.microlight,
+.swagger-ui .highlight-code pre.microlight {
+    background: #303030 !important;
+    border-radius: 4px;
+    color: #f7f7f7 !important;
+    font-size: 13px;
+}
+
+.swagger-ui .model-title,
+.swagger-ui .parameter__name,
+.swagger-ui .parameter__type,
+.swagger-ui .response-col_links,
+.swagger-ui .response-col_status,
+.swagger-ui section.models h4 {
+    color: var(--swagger-ink);
+}
+
+.swagger-ui svg {
+    fill: #111;
+}
+
+.swagger-ui section.models {
+    background: #fff;
+}
+
+@media (max-width: 760px) {
+    .swagger-ui .wrapper {
+        padding: 0 16px;
+    }
+
+    .swagger-ui .info {
+        margin: 32px 0;
+    }
+
+    .swagger-ui .info .title {
+        font-size: 30px;
+    }
+
+    .swagger-ui .scheme-container .schemes {
+        align-items: stretch;
+        flex-direction: column;
+        gap: 18px;
+    }
+
+    .swagger-ui .scheme-container .servers {
+        width: 100%;
+    }
+
+    .swagger-ui .auth-wrapper {
+        justify-content: flex-start;
+    }
+
+    .swagger-ui .opblock-tag {
+        align-items: flex-start;
+        flex-direction: column;
+        font-size: 21px;
+        gap: 5px;
+    }
+}
