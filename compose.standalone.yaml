@@ -1,0 +1,54 @@
+services:
+  main-service:
+    build:
+      context: .
+    image: gym-management:local
+    environment:
+      EUREKA_CLIENT_ENABLED: "false"
+      MANAGEMENT_HEALTH_JMS_ENABLED: "false"
+      MANAGEMENT_HEALTH_MAIL_ENABLED: "false"
+      MANAGEMENT_OTLP_METRICS_EXPORT_ENABLED: "false"
+      SPRING_ACTIVEMQ_BROKER_URL: tcp://127.0.0.1:61616
+      SPRING_DATASOURCE_URL: jdbc:h2:mem:gym_management;DB_CLOSE_DELAY=-1
+      SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.h2.Driver
+      SPRING_DATASOURCE_USERNAME: sa
+      SPRING_DATASOURCE_PASSWORD: ""
+      SPRING_JPA_HIBERNATE_DDL_AUTO: create-drop
+      SPRING_PROFILES_ACTIVE: local
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:8080/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+    networks:
+      - gym-platform
+
+  report-service:
+    build:
+      context: ../trainer-workload-service
+    image: trainer-workload-service:local
+    environment:
+      EUREKA_CLIENT_ENABLED: "false"
+      MANAGEMENT_HEALTH_JMS_ENABLED: "false"
+      MANAGEMENT_HEALTH_MONGO_ENABLED: "false"
+      MANAGEMENT_HEALTH_MONGODB_ENABLED: "false"
+      SPRING_DATA_MONGODB_AUTO_INDEX_CREATION: "false"
+      SPRING_JMS_LISTENER_AUTO_STARTUP: "false"
+      SPRING_PROFILES_ACTIVE: local
+    ports:
+      - "8081:8081"
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:8081/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+    networks:
+      - gym-platform
+
+networks:
+  gym-platform:
+    name: gym-platform

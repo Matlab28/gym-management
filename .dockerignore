@@ -1,0 +1,10 @@
+.git
+.gradle
+.idea
+build
+deploy
+docs
+grafana
+*.iml
+*.log
+.DS_Store

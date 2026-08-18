@@ -1,59 +1,168 @@
 services:
-  activemq:
-    image: apache/activemq:6.2.8
-    container_name: gym-management-activemq
+  main-service:
+    build:
+      context: .
+    image: gym-management:local
     restart: unless-stopped
     environment:
-      ACTIVEMQ_CONNECTION_USER: ${ACTIVEMQ_USER:-admin}
+      ACTIVEMQ_BROKER_URL: tcp://activemq:61616
+      ACTIVEMQ_PASSWORD: ${ACTIVEMQ_PASSWORD:-admin}
+      ACTIVEMQ_USER: ${ACTIVEMQ_USER:-admin}
+      EUREKA_CLIENT_ENABLED: "false"
+      MANAGEMENT_HEALTH_MAIL_ENABLED: "false"
+      MANAGEMENT_OTLP_METRICS_EXPORT_ENABLED: "false"
+      OPENAPI_GYM_SERVER_URL: http://localhost:8080
+      OPENAPI_WORKLOAD_SERVER_URL: http://localhost:8081
+      OTEL_SDK_DISABLED: "true"
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/gym_management
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_JPA_HIBERNATE_DDL_AUTO: create-drop
+      SPRING_PROFILES_ACTIVE: prod
+    ports:
+      - "8080:8080"
+    depends_on:
+      activemq:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:8080/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+    networks:
+      - gym-platform
+
+  report-service:
+    build:
+      context: ../trainer-workload-service
+    image: trainer-workload-service:local
+    restart: unless-stopped
+    environment:
+      ACTIVEMQ_BROKER_URL: tcp://activemq:61616
+      ACTIVEMQ_PASSWORD: ${ACTIVEMQ_PASSWORD:-admin}
+      ACTIVEMQ_USER: ${ACTIVEMQ_USER:-admin}
+      EUREKA_CLIENT_ENABLED: "false"
+      MONGODB_URI: mongodb://mongo:27017/trainer_workload
+      OPENAPI_GYM_SERVER_URL: http://localhost:8080
+      OPENAPI_WORKLOAD_SERVER_URL: http://localhost:8081
+      SPRING_PROFILES_ACTIVE: prod
+    ports:
+      - "8081:8081"
+    depends_on:
+      activemq:
+        condition: service_healthy
+      mongo:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:8081/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+    networks:
+      - gym-platform
+
+  activemq:
+    image: apache/activemq:6.2.8
+    restart: unless-stopped
+    entrypoint: ["/bin/bash", "/usr/local/bin/enable-local-console.sh"]
+    command: ["activemq", "console"]
+    environment:
       ACTIVEMQ_CONNECTION_PASSWORD: ${ACTIVEMQ_PASSWORD:-admin}
-      ACTIVEMQ_WEB_USER: ${ACTIVEMQ_WEB_USER:-admin}
-      ACTIVEMQ_WEB_PASSWORD: ${ACTIVEMQ_WEB_PASSWORD:-admin}
+      ACTIVEMQ_CONNECTION_USER: ${ACTIVEMQ_USER:-admin}
       ACTIVEMQ_OPTS_MEMORY: -Xms64M -Xmx256M
+      ACTIVEMQ_WEB_PASSWORD: ${ACTIVEMQ_WEB_PASSWORD:-admin}
+      ACTIVEMQ_WEB_USER: ${ACTIVEMQ_WEB_USER:-admin}
     ports:
       - "61616:61616"
       - "8161:8161"
     volumes:
-      - activemq-data:/opt/activemq/data
+      - activemq-data:/opt/apache-activemq/data
+      - ./docker/activemq/enable-local-console.sh:/usr/local/bin/enable-local-console.sh:ro
+    healthcheck:
+      test: ["CMD", "/bin/bash", "-c", "echo > /dev/tcp/127.0.0.1/61616"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    networks:
+      - gym-platform
 
   postgres:
-    image: postgres:latest
-    container_name: gym-management-postgres
+    image: postgres:17-alpine
+    restart: unless-stopped
     environment:
       POSTGRES_DB: gym_management
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
       - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d gym_management"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    networks:
+      - gym-platform
 
-  Prometheus:
-    image: 'prom/prometheus:v2.44.0'
-    container_name: 'Prometheus'
+  mongo:
+    image: mongo:8.0
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    networks:
+      - gym-platform
+
+  prometheus:
+    image: prom/prometheus:v2.44.0
+    profiles: ["observability"]
     restart: unless-stopped
     command:
-      - '--config.file=/etc/prometheus/prometheus.yml'
+      - --config.file=/etc/prometheus/prometheus.yml
     ports:
-      - '9090:9090'
+      - "9090:9090"
     volumes:
-      - './data/prometheus/config/prometheus.yaml:/etc/prometheus/prometheus.yml'
+      - ./data/prometheus/config/prometheus.yaml:/etc/prometheus/prometheus.yml:ro
+    networks:
+      - gym-platform
 
-  Grafana:
-    image: 'grafana/grafana:12.4.4'
-    pull_policy: always
-    container_name: 'Grafana'
+  grafana:
+    image: grafana/grafana:12.4.4
+    profiles: ["observability"]
     restart: unless-stopped
     user: root
-    ports:
-      - '3000:3000'
-    volumes:
-      - './grafana:/var/lib/grafana'
     environment:
-      - 'GF_SECURITY_ADMIN_USER=admin'
-      - 'GF_SECURITY_ADMIN_PASSWORD=secret'
-      - 'GF_USERS_ALLOW_SIGN_UP=false'
-      - 'GF_LOG_MODE=console file'
-      - 'GF_LOG_FILTERS=alerting=debug,auth=debug,backend=debug,datasource=debug,db=debug,plugins=debug,rendering=debug,server=debug,sqlstore=debug,utils=debug'
+      GF_LOG_FILTERS: alerting=debug,auth=debug,backend=debug,datasource=debug,db=debug,plugins=debug,rendering=debug,server=debug,sqlstore=debug,utils=debug
+      GF_LOG_MODE: console file
+      GF_SECURITY_ADMIN_PASSWORD: secret
+      GF_SECURITY_ADMIN_USER: admin
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./grafana:/var/lib/grafana
     depends_on:
-      - Prometheus
+      - prometheus
+    networks:
+      - gym-platform
+
+networks:
+  gym-platform:
+    name: gym-platform
 
 volumes:
   activemq-data:
+  mongo-data:
+  postgres-data:
