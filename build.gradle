@@ -6,6 +6,7 @@ plugins {
 }
 ext {
     springCloudVersion = "2025.1.1"
+    cucumberVersion = "7.34.6"
 }
 
 group = 'com.epam'
@@ -54,6 +55,10 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-thymeleaf-test'
     testImplementation 'org.springframework.boot:spring-boot-starter-validation-test'
     testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
+    testImplementation "io.cucumber:cucumber-java:${cucumberVersion}"
+    testImplementation "io.cucumber:cucumber-junit-platform-engine:${cucumberVersion}"
+    testImplementation 'org.junit.platform:junit-platform-suite'
+    testImplementation 'org.apache.activemq:activemq-broker'
     runtimeOnly 'com.h2database:h2'
     runtimeOnly 'org.springframework.boot:spring-boot-h2console'
     runtimeOnly 'io.micrometer:micrometer-registry-otlp'
